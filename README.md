@@ -1,4 +1,4 @@
-# SmartCash 💰
+# 💰 SmartCash
 
 ### Seu Dashboard Financeiro Inteligente
 
