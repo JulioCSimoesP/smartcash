@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,12 +11,12 @@
     <meta name="author" content="Júlio Simões">
     <meta name="copyright" content="© 2026 Júlio Simões">
 
+    <!-- \/ VERIFICAR NECESSIDADE DE INCLUIR OS ÍCONES -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <!-- \/ AQUI VAI O LINK DA FONTE DO GOOGLE FONTS -->
-    <link
-        href="###"
-        rel="stylesheet">
+    <link href="###" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 
     <!-- \/ AQUI VAI O ENDEREÇO DOS ARQUIVOS REFERENTES AO FAVICON -->
@@ -32,29 +33,687 @@
     <meta property="og:description"
         content="Organize sua vida financeira com o SmartCash. Controle transações, gerencie categorias e exporte relatórios profissionais de forma simples e segura.">
     <!-- \/ AQUI VAI O ENDEREÇO DA IMAGEM PARA O OPEN GRAPH -->
-    <meta property="og:image"
-        content="###">
+    <meta property="og:image" content="###">
     <!-- \/ AQUI VAI O LINK FINAL DO PROJETO PUBLICADO -->
     <meta property="og:url" content="###">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="SmartCash: Seu dashboard financeiro inteligente">
     <!-- \/ AQUI VAI O MESMO ENDEREÇO DA IMAGEM PARA O OPEN GRAPH -->
-    <meta name="twitter:image"
-        content="###">
+    <meta name="twitter:image" content="###">
     <meta name="twitter:description"
         content="Organize sua vida financeira com o SmartCash. Controle transações, gerencie categorias e exporte relatórios profissionais de forma simples e segura.">
     <!-- \/ AQUI VAI O LINK FINAL DO PROJETO PUBLICADO -->
     <link rel="canonical" href="###">
+    <script src="script.js" defer></script>
 </head>
+
 <body>
-    <main>
-        <h1>SmartCash: Seu dashboard financeiro inteligente</h1>
-        <form id="id-do-form">
-            <input type="text" id="id-da-descricao" placeholder="Descrição da transação" required>
-            <input type="number" id="id-do-valor" placeholder="Valor da transação" required>
-            <button type="submit">Adicionar Transação</button>
-        </form>
+    <header class="main-header">
+        <div class="header-wrapper">
+            <a href="#dashboard" class="logo-container">
+                <img src="assets/images/smartcash-logo.png" alt="SmartCash">
+            </a>
+            <nav class="menu-nav">
+                <ul>
+                    <li><a href="#dashboard">Visão Geral</a></li>
+                    <li><a href="#statements">Extratos</a></li>
+                    <li><a href="#categories">Categorias</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main id="app">
+
+        <!-- TELA DE DASHBOARD -->
+        <div id="dashboard-view" class="app-view">
+            <header class="view-header">
+                <div class="header-content">
+                    <h1>Olá, Usuário!</h1>
+                    <p>Confira abaixo o resumo da sua vida financeira.</p>
+                </div>
+
+                <button type="button" class="btn-primary" id="btn-add-desktop">
+                    <i class=""></i>
+                    <span>Adicionar Transação</span>
+                </button>
+            </header>
+
+            <button class="btn-sticky" id="btn-add-mobile" aria-label="Adicionar nova transação">
+                <div class="btn-sticky-icons-wrapper">
+                    <i class=""></i>
+                    <i class=""></i>
+                </div>
+            </button>
+
+            <section id="summary">
+                <div class="summary-wrapper">
+                    <article class="summary-item card-incomes"
+                        aria-label="Resumo de entradas: 9.999,99 reais, um aumento de 12% em relação ao mês passado">
+                        <div class="summary-icon">
+                            <i class=""></i>
+                        </div>
+
+                        <div class="summary-info">
+                            <div class="main-values">
+                                <span class="label">Entradas</span>
+                                <strong class="value">R$ 9.999,99</strong>
+                                <span class="timeframe">Este mês</span>
+                            </div>
+
+                            <div class="comparison-badge">
+                                <span class="percentage-tag">
+                                    <i class=""></i> 12%
+                                </span>
+                                <span class="comparison-label">vs mês passado</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="summary-item card-outcomes"
+                        aria-label="Resumo de saídas: 9.999,99 reais, um aumento de 12% em relação ao mês passado">
+                        <div class="summary-icon">
+                            <i class=""></i>
+                        </div>
+
+                        <div class="summary-info">
+                            <div class="main-values">
+                                <span class="label">Saídas</span>
+                                <strong class="value">R$ 9.999,99</strong>
+                                <span class="timeframe">Este mês</span>
+                            </div>
+
+                            <div class="comparison-badge">
+                                <span class="percentage-tag">
+                                    <i class=""></i> 12%
+                                </span>
+                                <span class="comparison-label">vs mês passado</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="summary-item card-balance"
+                        aria-label="Saldo geral: 9.999,99 reais, um aumento de 12% em relação ao mês passado">
+                        <div class="summary-icon">
+                            <i class=""></i>
+                        </div>
+
+                        <div class="summary-info">
+                            <div class="main-values">
+                                <span class="label">Saldo Geral</span>
+                                <strong class="value">R$ 9.999,99</strong>
+                                <span class="timeframe">Este mês</span>
+                            </div>
+
+                            <div class="comparison-badge">
+                                <span class="percentage-tag">
+                                    <i class=""></i> 12%
+                                </span>
+                                <span class="comparison-label">vs mês passado</span>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <section id="history">
+                <div class="history-wrapper">
+                    <div class="history-header">
+                        <h2>Histórico</h2>
+                        <button class="btn-secondary" id="btn-view-all" aria-label="Ver todas as transações">
+                            <div class="btn-secondary-wrapper">
+                                <i class=""></i>
+                                <span>Ver todas</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="info-tag">
+                        <i class=""></i>
+                        <span>Exibindo as 10 últimas transações</span>
+                    </div>
+                    <ul class="history-list">
+                        <li class="transaction-item" role="button" tabindex="0"
+                            aria-label="Detalhes da transação: Compra no mercado">
+
+                            <time class="transaction-date" datetime="2026-05-10">10/05/2026</time>
+
+                            <div class="transaction-category-wrapper">
+                                <i class=""></i>
+                                <span class="category-title">Alimentação</span>
+                            </div>
+
+                            <span class="transaction-description">Compra no mercado</span>
+
+                            <span class="transaction-type">Saída</span>
+
+                            <span class="transaction-amount negative">- R$ 150,00</span>
+
+                            <div class="transaction-action">
+                                <i class=""></i>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+
+        <!-- ~~~~~~~~~~~~~~~~~ -->
+
+        <!-- TELA DE EXTRATOS -->
+
+        <div id="statements-view" class="app-view">
+            <header class="view-header">
+                <h1>Extratos</h1>
+                <p>Acompanhe e filtre todas as suas movimentações financeiras.</p>
+            </header>
+
+            <button class="btn-sticky" id="btn-add-mobile" aria-label="Adicionar nova transação">
+                <div class="btn-sticky-icons-wrapper">
+                    <i class=""></i>
+                    <i class=""></i>
+                </div>
+            </button>
+
+            <div class="view-controls">
+                <section class="filters-wrapper">
+                    <div class="filter-group">
+                        <label for="date-from">De:</label>
+                        <input type="date" id="date-from" name="date-from">
+                    </div>
+                    <div class="filter-group">
+                        <label for="date-to">Até:</label>
+                        <input type="date" id="date-to" name="date-to">
+                    </div>
+                </section>
+
+                <div class="actions-wrapper">
+                    <button type="button" class="btn-primary" id="btn-add-desktop">
+                        <i class=""></i>
+                        <span>Adicionar Transação</span>
+                    </button>
+
+                    <div class="export-split-button">
+                        <button type="button" id="btn-export-action" class="export-main">
+                            <i class=""></i>
+                            <span>Exportar dados</span>
+                        </button>
+
+                        <button type="button" id="btn-export-toggle" class="export-toggle" aria-haspopup="true"
+                            aria-expanded="false" aria-label="Escolher formato de exportação">
+                            <span class="current-format">CSV</span>
+                            <i class=""></i>
+                        </button>
+
+                        <ul class="export-menu" id="export-options">
+                            <li><button type="button" data-format="csv">CSV</button></li>
+                            <li><button type="button" data-format="pdf">PDF</button></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <article class="period-summary-card" aria-label="Resumo do período filtrado">
+                    <div class="summary-stat">
+                        <div class="stat-info">
+                            <span class="stat-label">Entradas</span>
+                            <strong class="stat-value">R$ 9.999,99</strong>
+                        </div>
+                        <div class="stat-icon">
+                            <i class=""></i>
+                        </div>
+                    </div>
+
+                    <div class="summary-stat">
+                        <div class="stat-info">
+                            <span class="stat-label">Saídas</span>
+                            <strong class="stat-value">R$ 9.999,99</strong>
+                        </div>
+                        <div class="stat-icon">
+                            <i class=""></i>
+                        </div>
+                    </div>
+
+                    <div class="summary-stat">
+                        <div class="stat-info">
+                            <span class="stat-label">Saldo Geral</span>
+                            <strong class="stat-value">R$ 9.999,99</strong>
+                        </div>
+                        <div class="stat-icon">
+                            <i class=""></i>
+                        </div>
+                    </div>
+
+                    <div class="summary-stat">
+                        <div class="stat-info">
+                            <span class="stat-label">Lançamentos</span>
+                            <strong class="stat-value">9999</strong>
+                        </div>
+                        <div class="stat-icon">
+                            <i class=""></i>
+                        </div>
+                    </div>
+                </article>
+            </div>
+
+            <div class="history-wrapper">
+                <ul class="history-list">
+                    <li class="transaction-item" role="button" tabindex="0"
+                        aria-label="Detalhes da transação: Compra no mercado">
+
+                        <time class="transaction-date" datetime="2026-05-10">10/05/2026</time>
+
+                        <div class="transaction-category-wrapper">
+                            <i class=""></i>
+                            <span class="category-title">Alimentação</span>
+                        </div>
+
+                        <span class="transaction-description">Compra no mercado</span>
+
+                        <span class="transaction-type">Saída</span>
+
+                        <span class="transaction-amount negative">- R$ 150,00</span>
+
+                        <div class="transaction-action">
+                            <i class=""></i>
+                        </div>
+                    </li>
+                </ul>
+
+                <div class="pagination-footer">
+                    <div class="items-per-page-control">
+                        <label for="items-per-page">Itens por página:</label>
+                        <div class="select-wrapper">
+                            <select id="items-per-page" name="items-per-page">
+                                <option value="5">5</option>
+                                <option value="10" selected>10</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                            </select>
+                        </div>
+                    </div>
+                    <span>1-10 de 60 itens</span>
+                    <div class="pagination-controls">
+                        <button class="page-btn" aria-label="Página anterior"><i class=""></i></button>
+                        <div class="page-numbers-container">
+                            <button class="page-btn">1</button>
+                            <button class="page-btn">2</button>
+                            <button class="page-btn">3</button>
+                        </div>
+                        <button class="page-btn" aria-label="Próxima página"><i class=""></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ~~~~~~~~~~~~~~~~~ -->
+
+        <!-- TELA DE CATEGORIAS -->
+
+        <div id="categories-view" class="app-view">
+            <header class="view-header">
+                <h1>Categorias</h1>
+                <p>Gerencie suas categorias de entrada e saída.</p>
+            </header>
+
+            <button class="btn-sticky" id="btn-add-mobile" aria-label="Adicionar nova categoria">
+                <div class="btn-sticky-icons-wrapper">
+                    <i class=""></i>
+                    <i class=""></i>
+                </div>
+            </button>
+
+            <div class="view-controls">
+                <div class="categories-filter" role="radiogroup" aria-label="Filtrar categorias">
+                    <div class="filter-item">
+                        <input type="radio" id="filter-all" name="category-filter" value="all" checked>
+                        <label for="filter-all">
+                            <i class=""></i>
+                            <span>Todas</span>
+                        </label>
+                    </div>
+
+                    <div class="filter-item">
+                        <input type="radio" id="filter-default" name="category-filter" value="default">
+                        <label for="filter-default">
+                            <i class=""></i>
+                            <span>Padrão</span>
+                        </label>
+                    </div>
+
+                    <div class="filter-item">
+                        <input type="radio" id="filter-mine" name="category-filter" value="mine">
+                        <label for="filter-mine">
+                            <i class=""></i>
+                            <span>Minhas</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button type="button" class="btn-primary" id="btn-add-desktop">
+                    <i class=""></i>
+                    <span>Adicionar Categoria</span>
+                </button>
+            </div>
+
+            <div class="info-tag">
+                <i class=""></i>
+                <span>Uma categoria pode ser do tipo Entrada, Saída ou ambos. Isso define em quais transações ela pode ser utilizada.</span>
+            </div>
+
+            <div class="categories-wrapper">
+
+                <section id="section-default-categories" class="category-group">
+                    <header class="group-header">
+                        <h2>Categorias padrão</h2>
+                        <p>Categorias padrão não podem ser editadas ou apagadas.</p>
+                    </header>
+                    <ul class="category-list">
+                        <li class="category-card item-readonly">
+                            <div class="category-main-info">
+                                <div class="category-icon">
+                                    <i class=""></i>
+                                </div>
+                                <span class="category-name">Moradia</span>
+                                <span class="badge badge-outcome">Saída</span>
+                            </div>
+                            <div class="category-actions">
+                                <i class="" title="Categoria protegida"></i>
+                            </div>
+                        </li>
+                    </ul>
+                </section>
+
+                <section id="section-user-categories" class="category-group">
+                    <header class="group-header">
+                        <h2>Minhas Categorias</h2>
+                        <p>Categorias criadas por você. É possível editar ou apagar.</p>
+                    </header>
+                    <ul class="category-list">
+                        <li class="category-card">
+                            <div class="category-main-info">
+                                <div class="category-icon">
+                                    <i class=""></i>
+                                </div>
+                                <span class="category-name">Freelance</span>
+                                <span class="badge badge-income">Entrada</span>
+                            </div>
+                            <div class="category-actions">
+                                <button class="btn-action-edit" title="Editar categoria">
+                                    <i class=""></i>
+                                </button>
+                                <button class="btn-action-delete" title="Excluir categoria">
+                                    <i class=""></i>
+                                </button>
+                            </div>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+        </div>
+
+        <!-- ~~~~~~~~~~~~~~~~~ -->
+
     </main>
+
+    <div id="modal-menu" class="modal-container hidden">
+        <div class="menu-drawer">
+            <button class="btn-close-modal" id="btn-close-menu" aria-label="Fechar menu">
+                <i class=""></i>
+            </button>
+            <nav class="modal-menu-nav">
+                <button type="button" class="menu-btn" id="btn-menu-dashboard">
+                    <i class=""></i>
+                    <span>Visão Geral</span>
+                </button>
+                <button type="button" class="menu-btn" id="btn-menu-statements">
+                    <i class=""></i>
+                    <span>Extratos</span>
+                </button>
+                <button type="button" class="menu-btn" id="btn-menu-categories">
+                    <i class=""></i>
+                    <span>Categorias</span>
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <div id="modal-transaction-form" class="modal-container hidden">
+        <div class="modal-content">
+            <header class="modal-header">
+                <div class="modal-header-top">
+                    <h3>Nova Transação</h3>
+                    <button class="btn-close-modal" id="btn-close-transaction-form"
+                        aria-label="Fechar formulário de nova transação">
+                        <i class=""></i>
+                    </button>
+                </div>
+                <p>Preencha os dados abaixo para registrar sua transação.</p>
+            </header>
+
+            <form id="transaction-form" class="modal-body">
+                <div class="input-group">
+                    <label for="transaction-description">Descrição</label>
+                    <input type="text" id="transaction-description" placeholder="Ex: Compras no mercado" required>
+                </div>
+
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Tipo</label>
+                        <div class="transaction-type-toggle">
+                            <div class="type-option">
+                                <input type="radio" id="type-income" name="transaction-type" value="income" checked>
+                                <label for="type-income" class="label-income">
+                                    <i class=""></i>
+                                    <span>Entrada</span>
+                                </label>
+                            </div>
+
+                            <div class="type-option">
+                                <input type="radio" id="type-outcome" name="transaction-type" value="outcome">
+                                <label for="type-outcome" class="label-outcome">
+                                    <i class=""></i>
+                                    <span>Saída</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="transaction-amount">Valor</label>
+                        <input type="text" id="transaction-amount" placeholder="R$ 0,00" inputmode="decimal" required>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="transaction-date">Data</label>
+                    <input type="date" id="transaction-date" name="transaction-date">
+                </div>
+
+                <div class="input-group">
+                    <label>Categoria</label>
+                    <div class="category-selection-list" role="radiogroup"
+                        aria-label="Seleção de categoria para a transação">
+                        <div class="category-option">
+                            <input type="radio" id="category-xxxxxx" name="transaction-category" value="xxxxxx" checked>
+                            <label for="category-xxxxxx">
+                                <i class=""></i>
+                                <span>category-1</span>
+                            </label>
+                        </div>
+
+                        <div class="category-option">
+                            <input type="radio" id="category-yyyyyy" name="transaction-category" value="yyyyyy">
+                            <label for="category-yyyyyy">
+                                <i class=""></i>
+                                <span>category-2</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary">
+                    Registrar Transação
+                </button>
+            </form>
+
+        </div>
+    </div>
+
+    <div id="modal-transaction-details" class="modal-container hidden">
+        <div class="modal-content">
+            <header class="modal-header">
+                <div class="transaction-category">
+                    <i class=""></i>
+                    <span>Categoria</span>
+                </div>
+                <button class="btn-close-modal" id="btn-close-transaction-details"
+                    aria-label="Fechar detalhes da transação">
+                    <i class=""></i>
+                </button>
+            </header>
+            <div class="modal-body">
+                <h3 class="transaction-description">Descrição da transação</h3>
+                <strong class="transaction-details-amount">R$ 9999,00</strong>
+                <time class="transaction-details-date" datetime="2026-01-01">01/01/2026</time>
+            </div>
+            <div class="transaction-details-actions">
+                <button class="btn-transaction-details" id="btn-edit-transaction">
+                    <i class=""></i>
+                    <span>Editar</span>
+                </button>
+                <button class="btn-transaction-details" id="btn-delete-transaction">
+                    <i class=""></i>
+                    <span>Excluir</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-category-form" class="modal-container hidden">
+        <div class="modal-content">
+            <header class="modal-header">
+                <div class="modal-header-top">
+                    <h3>Nova Categoria</h3>
+                    <button class="btn-close-modal" id="btn-close-category-form"
+                        aria-label="Fechar formulário de nova categoria">
+                        <i class=""></i>
+                    </button>
+                </div>
+                <p>Preencha os dados abaixo para registrar sua categoria.</p>
+            </header>
+
+            <form id="category-form" class="modal-body">
+                <div class="input-group">
+                    <label for="category-name">Nome</label>
+                    <input type="text" id="category-name" placeholder="Ex: Compras no mercado" required>
+                </div>
+
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Tipo</label>
+                        <div class="category-type-toggle">
+                            <div class="type-option">
+                                <input type="radio" id="type-income" name="category-type" value="income" checked>
+                                <label for="type-income" class="label-income">
+                                    <i class=""></i>
+                                    <span>Entrada</span>
+                                </label>
+                            </div>
+
+                            <div class="type-option">
+                                <input type="radio" id="type-outcome" name="category-type" value="outcome">
+                                <label for="type-outcome" class="label-outcome">
+                                    <i class=""></i>
+                                    <span>Saída</span>
+                                </label>
+                            </div>
+
+                            <div class="type-option">
+                                <input type="radio" id="type-both" name="category-type" value="both">
+                                <label for="type-both" class="label-both">
+                                    <i class=""></i>
+                                    <span>Entrada e Saída</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Ícone</label>
+
+                        <button type="button" class="icon-selector-trigger" id="btn-icon-trigger">
+                            <div class="selected-icon-display">
+                                <i class=""></i>
+                            </div>
+                            <span>Selecionar ícone</span>
+                            <i class=""></i>
+                        </button>
+
+                        <div class="icon-grid-panel" id="icon-panel">
+                            <header class="icon-panel-header">
+                                <span>Escolha um ícone</span>
+                            </header>
+
+                            <div class="icon-grid">
+                                <div class="icon-option">
+                                    <input type="radio" id="icon-house" name="category-icon" value="house" checked>
+                                    <label for="icon-house">
+                                        <i class=""></i>
+                                    </label>
+                                </div>
+
+                                <div class="icon-option">
+                                    <input type="radio" id="icon-car" name="category-icon" value="car">
+                                    <label for="icon-car">
+                                        <i class=""></i>
+                                    </label>
+                                </div>
+
+                                <div class="icon-option">
+                                    <input type="radio" id="icon-burger" name="category-icon" value="burger">
+                                    <label for="icon-burger">
+                                        <i class=""></i>
+                                    </label>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary">
+                    Registrar Categoria
+                </button>
+            </form>
+
+        </div>
+    </div>
+
+    <div id="modal-confirm" class="modal-container" role="alertdialog" aria-labelledby="confirm-title"
+        aria-describedby="confirm-description" aria-modal="true">
+        <div class="modal-content">
+            <header class="modal-confirm-header">
+                <div class="warning-icon">
+                    <i class=""></i>
+                </div>
+                <h3 id="confirm-title">Excluir transação?</h3>
+            </header>
+            <div class="modal-body">
+                <p id="confirm-description">
+                    Você tem certeza que deseja remover esta transação?
+                    <strong>Essa ação não poderá ser desfeita</strong> e o valor será removido do seu saldo atual.
+                </p>
+            </div>
+            <footer class="modal-footer">
+                <button class="btn-confirm-cancel" id="btn-confirm-cancel">
+                    Não, manter
+                </button>
+
+                <button class="btn-confirm-delete" id="btn-confirm-delete">
+                    Sim, excluir
+                </button>
+            </footer>
+        </div>
+    </div>
 </body>
+
 </html>
