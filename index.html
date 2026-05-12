@@ -396,7 +396,8 @@
 
             <div class="info-tag">
                 <i class=""></i>
-                <span>Uma categoria pode ser do tipo Entrada, Saída ou ambos. Isso define em quais transações ela pode ser utilizada.</span>
+                <span>Uma categoria pode ser do tipo Entrada, Saída ou ambos. Isso define em quais transações ela pode
+                    ser utilizada.</span>
             </div>
 
             <div class="categories-wrapper">
@@ -499,21 +500,32 @@
                     <div class="input-group">
                         <label>Tipo</label>
                         <div class="transaction-type-toggle">
-                            <div class="type-option">
-                                <input type="radio" id="type-income" name="transaction-type" value="income" checked>
-                                <label for="type-income" class="label-income">
-                                    <i class=""></i>
-                                    <span>Entrada</span>
-                                </label>
+
+                            <button type="button" class="select-trigger" id="transaction-select-trigger">
+                                <div class="selected-value">
+                                    <i class=""></i> <span>Selecione o tipo</span>
+                                </div>
+                                <i class=""></i>
+                            </button>
+
+                            <div class="select-type-options" id="transaction-type-options-panel">
+                                <div class="type-option">
+                                    <input type="radio" id="type-income" name="transaction-type" value="income" checked>
+                                    <label for="type-income" class="label-income">
+                                        <i class=""></i>
+                                        <span>Entrada</span>
+                                    </label>
+                                </div>
+
+                                <div class="type-option">
+                                    <input type="radio" id="type-outcome" name="transaction-type" value="outcome">
+                                    <label for="type-outcome" class="label-outcome">
+                                        <i class=""></i>
+                                        <span>Saída</span>
+                                    </label>
+                                </div>
                             </div>
 
-                            <div class="type-option">
-                                <input type="radio" id="type-outcome" name="transaction-type" value="outcome">
-                                <label for="type-outcome" class="label-outcome">
-                                    <i class=""></i>
-                                    <span>Saída</span>
-                                </label>
-                            </div>
                         </div>
                     </div>
 
@@ -532,21 +544,33 @@
                     <label>Categoria</label>
                     <div class="category-selection-list" role="radiogroup"
                         aria-label="Seleção de categoria para a transação">
-                        <div class="category-option">
-                            <input type="radio" id="category-xxxxxx" name="transaction-category" value="xxxxxx" checked>
-                            <label for="category-xxxxxx">
-                                <i class=""></i>
-                                <span>category-1</span>
-                            </label>
+
+                        <button type="button" class="select-trigger" id="category-select-trigger">
+                            <div class="selected-value">
+                                <i class=""></i> <span>Selecione uma categoria</span>
+                            </div>
+                            <i class=""></i>
+                        </button>
+
+                        <div class="select-category-options" id="category-options-panel">
+                            <div class="category-option">
+                                <input type="radio" id="category-xxxxxx" name="transaction-category" value="xxxxxx"
+                                    checked>
+                                <label for="category-xxxxxx">
+                                    <i class=""></i>
+                                    <span>category-1</span>
+                                </label>
+                            </div>
+
+                            <div class="category-option">
+                                <input type="radio" id="category-yyyyyy" name="transaction-category" value="yyyyyy">
+                                <label for="category-yyyyyy">
+                                    <i class=""></i>
+                                    <span>category-2</span>
+                                </label>
+                            </div>
                         </div>
 
-                        <div class="category-option">
-                            <input type="radio" id="category-yyyyyy" name="transaction-category" value="yyyyyy">
-                            <label for="category-yyyyyy">
-                                <i class=""></i>
-                                <span>category-2</span>
-                            </label>
-                        </div>
                     </div>
                 </div>
 
@@ -611,29 +635,40 @@
                     <div class="input-group">
                         <label>Tipo</label>
                         <div class="category-type-toggle">
-                            <div class="type-option">
-                                <input type="radio" id="type-income" name="category-type" value="income" checked>
-                                <label for="type-income" class="label-income">
-                                    <i class=""></i>
-                                    <span>Entrada</span>
-                                </label>
+
+                            <button type="button" class="select-trigger" id="category-type-select-trigger">
+                                <div class="selected-value">
+                                    <i class=""></i> <span>Selecione o tipo</span>
+                                </div>
+                                <i class=""></i>
+                            </button>
+
+                            <div class="select-type-options" id="category-type-options-panel">
+                                <div class="type-option">
+                                    <input type="radio" id="type-income" name="category-type" value="income" checked>
+                                    <label for="type-income" class="label-income">
+                                        <i class=""></i>
+                                        <span>Entrada</span>
+                                    </label>
+                                </div>
+
+                                <div class="type-option">
+                                    <input type="radio" id="type-outcome" name="category-type" value="outcome">
+                                    <label for="type-outcome" class="label-outcome">
+                                        <i class=""></i>
+                                        <span>Saída</span>
+                                    </label>
+                                </div>
+
+                                <div class="type-option">
+                                    <input type="radio" id="type-both" name="category-type" value="both">
+                                    <label for="type-both" class="label-both">
+                                        <i class=""></i>
+                                        <span>Entrada e Saída</span>
+                                    </label>
+                                </div>
                             </div>
 
-                            <div class="type-option">
-                                <input type="radio" id="type-outcome" name="category-type" value="outcome">
-                                <label for="type-outcome" class="label-outcome">
-                                    <i class=""></i>
-                                    <span>Saída</span>
-                                </label>
-                            </div>
-
-                            <div class="type-option">
-                                <input type="radio" id="type-both" name="category-type" value="both">
-                                <label for="type-both" class="label-both">
-                                    <i class=""></i>
-                                    <span>Entrada e Saída</span>
-                                </label>
-                            </div>
                         </div>
                     </div>
 
@@ -653,7 +688,7 @@
                                 <span>Escolha um ícone</span>
                             </header>
 
-                            <div class="icon-grid">
+                            <div class="icon-grid" id="icon-options-grid">
                                 <div class="icon-option">
                                     <input type="radio" id="icon-house" name="category-icon" value="house" checked>
                                     <label for="icon-house">
