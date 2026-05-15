@@ -11,12 +11,11 @@
     <meta name="author" content="Júlio Simões">
     <meta name="copyright" content="© 2026 Júlio Simões">
 
-    <!-- \/ VERIFICAR NECESSIDADE DE INCLUIR OS ÍCONES -->
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- \/ AQUI VAI O LINK DA FONTE DO GOOGLE FONTS -->
-    <link href="###" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 
     <!-- \/ AQUI VAI O ENDEREÇO DOS ARQUIVOS REFERENTES AO FAVICON -->
@@ -54,13 +53,20 @@
             <a href="#dashboard" class="logo-container">
                 <img src="assets/images/smartcash-logo.png" alt="SmartCash">
             </a>
-            <nav class="menu-nav">
+            <nav class="menu-nav hidden">
                 <ul>
                     <li><a href="#dashboard">Visão Geral</a></li>
                     <li><a href="#statements">Extratos</a></li>
                     <li><a href="#categories">Categorias</a></li>
                 </ul>
             </nav>
+            <button class="btn-menu-toggle" id="btn-open-menu" aria-label="Abrir menu de navegação">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256">
+                    <path
+                        d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128ZM40,72H216a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16ZM216,184H40a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16Z">
+                    </path>
+                </svg>
+            </button>
         </div>
     </header>
     <main id="app">
@@ -73,25 +79,23 @@
                     <p>Confira abaixo o resumo da sua vida financeira.</p>
                 </div>
 
-                <button type="button" class="btn-primary" id="btn-add-desktop">
+                <button type="button" class="btn-primary hidden" id="btn-add-desktop">
                     <i class=""></i>
                     <span>Adicionar Transação</span>
                 </button>
             </header>
-
-            <button class="btn-sticky" id="btn-add-mobile" aria-label="Adicionar nova transação">
-                <div class="btn-sticky-icons-wrapper">
-                    <i class=""></i>
-                    <i class=""></i>
-                </div>
-            </button>
 
             <section id="summary">
                 <div class="summary-wrapper">
                     <article class="summary-item card-incomes"
                         aria-label="Resumo de entradas: 9.999,99 reais, um aumento de 12% em relação ao mês passado">
                         <div class="summary-icon">
-                            <i class=""></i>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                viewBox="0 0 256 256">
+                                <path
+                                    d="M240,56v64a8,8,0,0,1-16,0V75.31l-82.34,82.35a8,8,0,0,1-11.32,0L96,123.31,29.66,189.66a8,8,0,0,1-11.32-11.32l72-72a8,8,0,0,1,11.32,0L136,140.69,212.69,64H168a8,8,0,0,1,0-16h64A8,8,0,0,1,240,56Z">
+                                </path>
+                            </svg>
                         </div>
 
                         <div class="summary-info">
@@ -102,8 +106,13 @@
                             </div>
 
                             <div class="comparison-badge">
-                                <span class="percentage-tag">
-                                    <i class=""></i> 12%
+                                <span class="percentage-tag is-negative">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                        viewBox="0 0 256 256">
+                                        <path
+                                            d="M205.66,149.66l-72,72a8,8,0,0,1-11.32,0l-72-72a8,8,0,0,1,11.32-11.32L120,196.69V40a8,8,0,0,1,16,0V196.69l58.34-58.35a8,8,0,0,1,11.32,11.32Z">
+                                        </path>
+                                    </svg> 12%
                                 </span>
                                 <span class="comparison-label">vs mês passado</span>
                             </div>
@@ -113,7 +122,12 @@
                     <article class="summary-item card-outcomes"
                         aria-label="Resumo de saídas: 9.999,99 reais, um aumento de 12% em relação ao mês passado">
                         <div class="summary-icon">
-                            <i class=""></i>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                viewBox="0 0 256 256">
+                                <path
+                                    d="M240,128v64a8,8,0,0,1-8,8H168a8,8,0,0,1,0-16h44.69L136,107.31l-34.34,34.35a8,8,0,0,1-11.32,0l-72-72A8,8,0,0,1,29.66,58.34L96,124.69l34.34-34.35a8,8,0,0,1,11.32,0L224,172.69V128a8,8,0,0,1,16,0Z">
+                                </path>
+                            </svg>
                         </div>
 
                         <div class="summary-info">
@@ -124,8 +138,13 @@
                             </div>
 
                             <div class="comparison-badge">
-                                <span class="percentage-tag">
-                                    <i class=""></i> 12%
+                                <span class="percentage-tag is-positive">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                        viewBox="0 0 256 256">
+                                        <path
+                                            d="M205.66,117.66a8,8,0,0,1-11.32,0L136,59.31V216a8,8,0,0,1-16,0V59.31L61.66,117.66a8,8,0,0,1-11.32-11.32l72-72a8,8,0,0,1,11.32,0l72,72A8,8,0,0,1,205.66,117.66Z">
+                                        </path>
+                                    </svg> 12%
                                 </span>
                                 <span class="comparison-label">vs mês passado</span>
                             </div>
@@ -135,7 +154,12 @@
                     <article class="summary-item card-balance"
                         aria-label="Saldo geral: 9.999,99 reais, um aumento de 12% em relação ao mês passado">
                         <div class="summary-icon">
-                            <i class=""></i>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                viewBox="0 0 256 256">
+                                <path
+                                    d="M216,64H56a8,8,0,0,1,0-16H192a8,8,0,0,0,0-16H56A24,24,0,0,0,32,56V184a24,24,0,0,0,24,24H216a16,16,0,0,0,16-16V80A16,16,0,0,0,216,64Zm0,128H56a8,8,0,0,1-8-8V78.63A23.84,23.84,0,0,0,56,80H216Zm-48-60a12,12,0,1,1,12,12A12,12,0,0,1,168,132Z">
+                                </path>
+                            </svg>
                         </div>
 
                         <div class="summary-info">
@@ -146,8 +170,13 @@
                             </div>
 
                             <div class="comparison-badge">
-                                <span class="percentage-tag">
-                                    <i class=""></i> 12%
+                                <span class="percentage-tag is-positive">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                        viewBox="0 0 256 256">
+                                        <path
+                                            d="M205.66,117.66a8,8,0,0,1-11.32,0L136,59.31V216a8,8,0,0,1-16,0V59.31L61.66,117.66a8,8,0,0,1-11.32-11.32l72-72a8,8,0,0,1,11.32,0l72,72A8,8,0,0,1,205.66,117.66Z">
+                                        </path>
+                                    </svg> 12%
                                 </span>
                                 <span class="comparison-label">vs mês passado</span>
                             </div>
@@ -162,13 +191,23 @@
                         <h2>Histórico</h2>
                         <button class="btn-secondary" id="btn-view-all" aria-label="Ver todas as transações">
                             <div class="btn-secondary-wrapper">
-                                <i class=""></i>
                                 <span>Ver todas</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                    viewBox="0 0 256 256">
+                                    <path
+                                        d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z">
+                                    </path>
+                                </svg>
                             </div>
                         </button>
                     </div>
                     <div class="info-tag">
-                        <i class=""></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                            viewBox="0 0 256 256">
+                            <path
+                                d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z">
+                            </path>
+                        </svg>
                         <span>Exibindo as 10 últimas transações</span>
                     </div>
                     <ul class="history-list">
@@ -178,18 +217,90 @@
                             <time class="transaction-date" datetime="2026-05-10">10/05/2026</time>
 
                             <div class="transaction-category-wrapper">
-                                <i class=""></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                    viewBox="0 0 256 256">
+                                    <path
+                                        d="M48.07,104H207.93a16,16,0,0,0,15.72-19.38C216.22,49.5,176,24,128,24S39.78,49.5,32.35,84.62A16,16,0,0,0,48.07,104ZM128,40c39.82,0,74.21,20.61,79.93,48H48.07L48,87.93C53.79,60.61,88.18,40,128,40ZM229.26,152.48l-41.13,15L151,152.57a8,8,0,0,0-5.94,0l-37,14.81L71,152.57a8,8,0,0,0-5.7-.09l-44,16a8,8,0,0,0,5.47,15L40,178.69V184a40,40,0,0,0,40,40h96a40,40,0,0,0,40-40v-9.67l18.73-6.81a8,8,0,1,0-5.47-15ZM200,184a24,24,0,0,1-24,24H80a24,24,0,0,1-24-24V172.88l11.87-4.32L105,183.43a8,8,0,0,0,5.94,0l37-14.81,37,14.81a8,8,0,0,0,5.7.09l9.27-3.37ZM16,128a8,8,0,0,1,8-8H232a8,8,0,0,1,0,16H24A8,8,0,0,1,16,128Z">
+                                    </path>
+                                </svg>
                                 <span class="category-title">Alimentação</span>
                             </div>
 
-                            <span class="transaction-description">Compra no mercado</span>
+                            <span class="transaction-description hidden">Compra no mercado</span>
 
-                            <span class="transaction-type">Saída</span>
+                            <span class="transaction-type is-negative  hidden">Saída</span>
 
-                            <span class="transaction-amount negative">- R$ 150,00</span>
+                            <span class="transaction-amount is-negative">- R$ 150,00</span>
 
                             <div class="transaction-action">
-                                <i class=""></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                    viewBox="0 0 256 256">
+                                    <path
+                                        d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z">
+                                    </path>
+                                </svg>
+                            </div>
+                        </li>
+
+                        <li class="transaction-item" role="button" tabindex="0"
+                            aria-label="Detalhes da transação: Compra no mercado">
+
+                            <time class="transaction-date" datetime="2026-05-10">10/05/2026</time>
+
+                            <div class="transaction-category-wrapper">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                    viewBox="0 0 256 256">
+                                    <path
+                                        d="M48.07,104H207.93a16,16,0,0,0,15.72-19.38C216.22,49.5,176,24,128,24S39.78,49.5,32.35,84.62A16,16,0,0,0,48.07,104ZM128,40c39.82,0,74.21,20.61,79.93,48H48.07L48,87.93C53.79,60.61,88.18,40,128,40ZM229.26,152.48l-41.13,15L151,152.57a8,8,0,0,0-5.94,0l-37,14.81L71,152.57a8,8,0,0,0-5.7-.09l-44,16a8,8,0,0,0,5.47,15L40,178.69V184a40,40,0,0,0,40,40h96a40,40,0,0,0,40-40v-9.67l18.73-6.81a8,8,0,1,0-5.47-15ZM200,184a24,24,0,0,1-24,24H80a24,24,0,0,1-24-24V172.88l11.87-4.32L105,183.43a8,8,0,0,0,5.94,0l37-14.81,37,14.81a8,8,0,0,0,5.7.09l9.27-3.37ZM16,128a8,8,0,0,1,8-8H232a8,8,0,0,1,0,16H24A8,8,0,0,1,16,128Z">
+                                    </path>
+                                </svg>
+                                <span class="category-title">Alimentação</span>
+                            </div>
+
+                            <span class="transaction-description hidden">Compra no mercado</span>
+
+                            <span class="transaction-type is-negative hidden">Saída</span>
+
+                            <span class="transaction-amount is-negative">- R$ 150,00</span>
+
+                            <div class="transaction-action">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                    viewBox="0 0 256 256">
+                                    <path
+                                        d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z">
+                                    </path>
+                                </svg>
+                            </div>
+                        </li>
+
+                        <li class="transaction-item" role="button" tabindex="0"
+                            aria-label="Detalhes da transação: Compra no mercado">
+
+                            <time class="transaction-date" datetime="2026-05-10">10/05/2026</time>
+
+                            <div class="transaction-category-wrapper">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                    viewBox="0 0 256 256">
+                                    <path
+                                        d="M48.07,104H207.93a16,16,0,0,0,15.72-19.38C216.22,49.5,176,24,128,24S39.78,49.5,32.35,84.62A16,16,0,0,0,48.07,104ZM128,40c39.82,0,74.21,20.61,79.93,48H48.07L48,87.93C53.79,60.61,88.18,40,128,40ZM229.26,152.48l-41.13,15L151,152.57a8,8,0,0,0-5.94,0l-37,14.81L71,152.57a8,8,0,0,0-5.7-.09l-44,16a8,8,0,0,0,5.47,15L40,178.69V184a40,40,0,0,0,40,40h96a40,40,0,0,0,40-40v-9.67l18.73-6.81a8,8,0,1,0-5.47-15ZM200,184a24,24,0,0,1-24,24H80a24,24,0,0,1-24-24V172.88l11.87-4.32L105,183.43a8,8,0,0,0,5.94,0l37-14.81,37,14.81a8,8,0,0,0,5.7.09l9.27-3.37ZM16,128a8,8,0,0,1,8-8H232a8,8,0,0,1,0,16H24A8,8,0,0,1,16,128Z">
+                                    </path>
+                                </svg>
+                                <span class="category-title">Alimentação</span>
+                            </div>
+
+                            <span class="transaction-description hidden">Compra no mercado</span>
+
+                            <span class="transaction-type is-positive hidden">Entrada</span>
+
+                            <span class="transaction-amount is-positive">+ R$ 150,00</span>
+
+                            <div class="transaction-action">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                    viewBox="0 0 256 256">
+                                    <path
+                                        d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z">
+                                    </path>
+                                </svg>
                             </div>
                         </li>
                     </ul>
@@ -201,7 +312,7 @@
 
         <!-- TELA DE EXTRATOS -->
 
-        <div id="statements-view" class="app-view">
+        <div id="statements-view" class="app-view hidden">
             <header class="view-header">
                 <h1>Extratos</h1>
                 <p>Acompanhe e filtre todas as suas movimentações financeiras.</p>
@@ -348,7 +459,7 @@
 
         <!-- TELA DE CATEGORIAS -->
 
-        <div id="categories-view" class="app-view">
+        <div id="categories-view" class="app-view hidden">
             <header class="view-header">
                 <h1>Categorias</h1>
                 <p>Gerencie suas categorias de entrada e saída.</p>
@@ -723,7 +834,7 @@
         </div>
     </div>
 
-    <div id="modal-confirm" class="modal-container" role="alertdialog" aria-labelledby="confirm-title"
+    <div id="modal-confirm" class="modal-container hidden" role="alertdialog" aria-labelledby="confirm-title"
         aria-describedby="confirm-description" aria-modal="true">
         <div class="modal-content">
             <header class="modal-confirm-header">
@@ -749,6 +860,27 @@
             </footer>
         </div>
     </div>
+
+    <button class="btn-sticky btn-transaction" id="btn-add-transaction-mobile"
+        aria-label="Adicionar nova transação">
+        <div class="btn-sticky-icon-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256">
+                <path
+                    d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z">
+                </path>
+            </svg>
+        </div>
+    </button>
+
+    <button class="btn-sticky btn-category hidden" id="btn-add-category-mobile" aria-label="Adicionar nova categoria">
+        <div class="btn-sticky-icon-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256">
+                <path
+                    d="M216,72H130.67L102.93,51.2a16.12,16.12,0,0,0-9.6-3.2H40A16,16,0,0,0,24,64V200a16,16,0,0,0,16,16H216.89A15.13,15.13,0,0,0,232,200.89V88A16,16,0,0,0,216,72Zm0,128H40V64H93.33L123.2,86.4A8,8,0,0,0,128,88h88Zm-56-56a8,8,0,0,1-8,8H136v16a8,8,0,0,1-16,0V152H104a8,8,0,0,1,0-16h16V120a8,8,0,0,1,16,0v16h16A8,8,0,0,1,160,144Z">
+                </path>
+            </svg>
+        </div>
+    </button>
 </body>
 
 </html>
