@@ -47,7 +47,7 @@
     <script src="script.js" defer></script>
 </head>
 
-<body>
+<body class="modal-open">
     <header class="main-header">
         <div class="header-wrapper">
             <a href="#dashboard" class="logo-container">
@@ -72,7 +72,7 @@
     <main id="app">
 
         <!-- TELA DE DASHBOARD -->
-        <div id="dashboard-view" class="app-view">
+        <div id="dashboard-view" class="app-view hidden">
             <header class="view-header">
                 <div class="header-content">
                     <h1>Olá, Usuário!</h1>
@@ -314,48 +314,53 @@
 
         <div id="statements-view" class="app-view hidden">
             <header class="view-header">
-                <h1>Extratos</h1>
-                <p>Acompanhe e filtre todas as suas movimentações financeiras.</p>
+                <div class="header-content">
+                    <h1>Extratos</h1>
+                    <p>Acompanhe e filtre todas as suas movimentações financeiras.</p>
+                </div>
             </header>
 
-            <button class="btn-sticky" id="btn-add-mobile" aria-label="Adicionar nova transação">
-                <div class="btn-sticky-icons-wrapper">
-                    <i class=""></i>
-                    <i class=""></i>
-                </div>
-            </button>
-
-            <div class="view-controls">
-                <section class="filters-wrapper">
-                    <div class="filter-group">
+            <div class="statements-view-controls">
+                <section class="filter-wrapper">
+                    <div class="filter-input">
                         <label for="date-from">De:</label>
                         <input type="date" id="date-from" name="date-from">
                     </div>
-                    <div class="filter-group">
+                    <div class="filter-input">
                         <label for="date-to">Até:</label>
                         <input type="date" id="date-to" name="date-to">
                     </div>
                 </section>
 
                 <div class="actions-wrapper">
-                    <button type="button" class="btn-primary" id="btn-add-desktop">
+                    <button type="button" class="btn-primary hidden" id="btn-add-desktop">
                         <i class=""></i>
                         <span>Adicionar Transação</span>
                     </button>
 
                     <div class="export-split-button">
                         <button type="button" id="btn-export-action" class="export-main">
-                            <i class=""></i>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                viewBox="0 0 256 256">
+                                <path
+                                    d="M216,112v96a16,16,0,0,1-16,16H56a16,16,0,0,1-16-16V112A16,16,0,0,1,56,96H80a8,8,0,0,1,0,16H56v96H200V112H176a8,8,0,0,1,0-16h24A16,16,0,0,1,216,112ZM93.66,69.66,120,43.31V136a8,8,0,0,0,16,0V43.31l26.34,26.35a8,8,0,0,0,11.32-11.32l-40-40a8,8,0,0,0-11.32,0l-40,40A8,8,0,0,0,93.66,69.66Z">
+                                </path>
+                            </svg>
                             <span>Exportar dados</span>
                         </button>
 
                         <button type="button" id="btn-export-toggle" class="export-toggle" aria-haspopup="true"
                             aria-expanded="false" aria-label="Escolher formato de exportação">
                             <span class="current-format">CSV</span>
-                            <i class=""></i>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                viewBox="0 0 256 256">
+                                <path
+                                    d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z">
+                                </path>
+                            </svg>
                         </button>
 
-                        <ul class="export-menu" id="export-options">
+                        <ul class="export-menu hidden" id="export-options">
                             <li><button type="button" data-format="csv">CSV</button></li>
                             <li><button type="button" data-format="pdf">PDF</button></li>
                         </ul>
@@ -363,43 +368,63 @@
                 </div>
 
                 <article class="period-summary-card" aria-label="Resumo do período filtrado">
-                    <div class="summary-stat">
+                    <div class="summary-stat income-summary-stat">
                         <div class="stat-info">
                             <span class="stat-label">Entradas</span>
                             <strong class="stat-value">R$ 9.999,99</strong>
                         </div>
                         <div class="stat-icon">
-                            <i class=""></i>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                viewBox="0 0 256 256">
+                                <path
+                                    d="M240,56v64a8,8,0,0,1-16,0V75.31l-82.34,82.35a8,8,0,0,1-11.32,0L96,123.31,29.66,189.66a8,8,0,0,1-11.32-11.32l72-72a8,8,0,0,1,11.32,0L136,140.69,212.69,64H168a8,8,0,0,1,0-16h64A8,8,0,0,1,240,56Z">
+                                </path>
+                            </svg>
                         </div>
                     </div>
 
-                    <div class="summary-stat">
+                    <div class="summary-stat outcome-summary-stat">
                         <div class="stat-info">
                             <span class="stat-label">Saídas</span>
                             <strong class="stat-value">R$ 9.999,99</strong>
                         </div>
                         <div class="stat-icon">
-                            <i class=""></i>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                viewBox="0 0 256 256">
+                                <path
+                                    d="M240,128v64a8,8,0,0,1-8,8H168a8,8,0,0,1,0-16h44.69L136,107.31l-34.34,34.35a8,8,0,0,1-11.32,0l-72-72A8,8,0,0,1,29.66,58.34L96,124.69l34.34-34.35a8,8,0,0,1,11.32,0L224,172.69V128a8,8,0,0,1,16,0Z">
+                                </path>
+                            </svg>
                         </div>
                     </div>
 
-                    <div class="summary-stat">
-                        <div class="stat-info">
+                    <div class="summary-stat balance-summary-stat">
+                        <div class=" stat-info">
                             <span class="stat-label">Saldo Geral</span>
                             <strong class="stat-value">R$ 9.999,99</strong>
                         </div>
                         <div class="stat-icon">
-                            <i class=""></i>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                viewBox="0 0 256 256">
+                                <path
+                                    d="M216,64H56a8,8,0,0,1,0-16H192a8,8,0,0,0,0-16H56A24,24,0,0,0,32,56V184a24,24,0,0,0,24,24H216a16,16,0,0,0,16-16V80A16,16,0,0,0,216,64Zm0,128H56a8,8,0,0,1-8-8V78.63A23.84,23.84,0,0,0,56,80H216Zm-48-60a12,12,0,1,1,12,12A12,12,0,0,1,168,132Z">
+                                </path>
+                            </svg>
                         </div>
                     </div>
 
-                    <div class="summary-stat">
-                        <div class="stat-info">
+                    <div class="summary-stat transactions-summary-stat">
+                        <div class=" stat-info">
                             <span class="stat-label">Lançamentos</span>
                             <strong class="stat-value">9999</strong>
                         </div>
                         <div class="stat-icon">
-                            <i class=""></i>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                viewBox="0 0 256 256">
+                                <path
+                                    d="M230.91,172A8,8,0,0,1,228,182.91l-96,56a8,8,0,0,1-8.06,0l-96-56A8,8,0,0,1,36,169.09l92,53.65,92-53.65A8,8,0,0,1,230.91,172ZM220,121.09l-92,53.65L36,121.09A8,8,0,0,0,28,134.91l96,56a8,8,0,0,0,8.06,0l96-56A8,8,0,1,0,220,121.09ZM24,80a8,8,0,0,1,4-6.91l96-56a8,8,0,0,1,8.06,0l96,56a8,8,0,0,1,0,13.82l-96,56a8,8,0,0,1-8.06,0l-96-56A8,8,0,0,1,24,80Zm23.88,0L128,126.74,208.12,80,128,33.26Z">
+                                </path>
+                            </svg>
                         </div>
                     </div>
                 </article>
@@ -413,18 +438,90 @@
                         <time class="transaction-date" datetime="2026-05-10">10/05/2026</time>
 
                         <div class="transaction-category-wrapper">
-                            <i class=""></i>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                viewBox="0 0 256 256">
+                                <path
+                                    d="M48.07,104H207.93a16,16,0,0,0,15.72-19.38C216.22,49.5,176,24,128,24S39.78,49.5,32.35,84.62A16,16,0,0,0,48.07,104ZM128,40c39.82,0,74.21,20.61,79.93,48H48.07L48,87.93C53.79,60.61,88.18,40,128,40ZM229.26,152.48l-41.13,15L151,152.57a8,8,0,0,0-5.94,0l-37,14.81L71,152.57a8,8,0,0,0-5.7-.09l-44,16a8,8,0,0,0,5.47,15L40,178.69V184a40,40,0,0,0,40,40h96a40,40,0,0,0,40-40v-9.67l18.73-6.81a8,8,0,1,0-5.47-15ZM200,184a24,24,0,0,1-24,24H80a24,24,0,0,1-24-24V172.88l11.87-4.32L105,183.43a8,8,0,0,0,5.94,0l37-14.81,37,14.81a8,8,0,0,0,5.7.09l9.27-3.37ZM16,128a8,8,0,0,1,8-8H232a8,8,0,0,1,0,16H24A8,8,0,0,1,16,128Z">
+                                </path>
+                            </svg>
                             <span class="category-title">Alimentação</span>
                         </div>
 
-                        <span class="transaction-description">Compra no mercado</span>
+                        <span class="transaction-description hidden">Compra no mercado</span>
 
-                        <span class="transaction-type">Saída</span>
+                        <span class="transaction-type is-negative hidden">Saída</span>
 
-                        <span class="transaction-amount negative">- R$ 150,00</span>
+                        <span class="transaction-amount is-negative">- R$ 150,00</span>
 
                         <div class="transaction-action">
-                            <i class=""></i>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                viewBox="0 0 256 256">
+                                <path
+                                    d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z">
+                                </path>
+                            </svg>
+                        </div>
+                    </li>
+
+                    <li class="transaction-item" role="button" tabindex="0"
+                        aria-label="Detalhes da transação: Compra no mercado">
+
+                        <time class="transaction-date" datetime="2026-05-10">10/05/2026</time>
+
+                        <div class="transaction-category-wrapper">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                viewBox="0 0 256 256">
+                                <path
+                                    d="M48.07,104H207.93a16,16,0,0,0,15.72-19.38C216.22,49.5,176,24,128,24S39.78,49.5,32.35,84.62A16,16,0,0,0,48.07,104ZM128,40c39.82,0,74.21,20.61,79.93,48H48.07L48,87.93C53.79,60.61,88.18,40,128,40ZM229.26,152.48l-41.13,15L151,152.57a8,8,0,0,0-5.94,0l-37,14.81L71,152.57a8,8,0,0,0-5.7-.09l-44,16a8,8,0,0,0,5.47,15L40,178.69V184a40,40,0,0,0,40,40h96a40,40,0,0,0,40-40v-9.67l18.73-6.81a8,8,0,1,0-5.47-15ZM200,184a24,24,0,0,1-24,24H80a24,24,0,0,1-24-24V172.88l11.87-4.32L105,183.43a8,8,0,0,0,5.94,0l37-14.81,37,14.81a8,8,0,0,0,5.7.09l9.27-3.37ZM16,128a8,8,0,0,1,8-8H232a8,8,0,0,1,0,16H24A8,8,0,0,1,16,128Z">
+                                </path>
+                            </svg>
+                            <span class="category-title">Alimentação</span>
+                        </div>
+
+                        <span class="transaction-description hidden">Compra no mercado</span>
+
+                        <span class="transaction-type is-negative hidden">Saída</span>
+
+                        <span class="transaction-amount is-negative">- R$ 150,00</span>
+
+                        <div class="transaction-action">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                viewBox="0 0 256 256">
+                                <path
+                                    d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z">
+                                </path>
+                            </svg>
+                        </div>
+                    </li>
+
+                    <li class="transaction-item" role="button" tabindex="0"
+                        aria-label="Detalhes da transação: Compra no mercado">
+
+                        <time class="transaction-date" datetime="2026-05-10">10/05/2026</time>
+
+                        <div class="transaction-category-wrapper">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                viewBox="0 0 256 256">
+                                <path
+                                    d="M48.07,104H207.93a16,16,0,0,0,15.72-19.38C216.22,49.5,176,24,128,24S39.78,49.5,32.35,84.62A16,16,0,0,0,48.07,104ZM128,40c39.82,0,74.21,20.61,79.93,48H48.07L48,87.93C53.79,60.61,88.18,40,128,40ZM229.26,152.48l-41.13,15L151,152.57a8,8,0,0,0-5.94,0l-37,14.81L71,152.57a8,8,0,0,0-5.7-.09l-44,16a8,8,0,0,0,5.47,15L40,178.69V184a40,40,0,0,0,40,40h96a40,40,0,0,0,40-40v-9.67l18.73-6.81a8,8,0,1,0-5.47-15ZM200,184a24,24,0,0,1-24,24H80a24,24,0,0,1-24-24V172.88l11.87-4.32L105,183.43a8,8,0,0,0,5.94,0l37-14.81,37,14.81a8,8,0,0,0,5.7.09l9.27-3.37ZM16,128a8,8,0,0,1,8-8H232a8,8,0,0,1,0,16H24A8,8,0,0,1,16,128Z">
+                                </path>
+                            </svg>
+                            <span class="category-title">Alimentação</span>
+                        </div>
+
+                        <span class="transaction-description hidden">Compra no mercado</span>
+
+                        <span class="transaction-type is-negative hidden">Saída</span>
+
+                        <span class="transaction-amount is-negative">- R$ 150,00</span>
+
+                        <div class="transaction-action">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                viewBox="0 0 256 256">
+                                <path
+                                    d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z">
+                                </path>
+                            </svg>
                         </div>
                     </li>
                 </ul>
@@ -441,15 +538,29 @@
                             </select>
                         </div>
                     </div>
-                    <span>1-10 de 60 itens</span>
+                    <span class="current-shown-items">1-10 de 60 itens</span>
                     <div class="pagination-controls">
-                        <button class="page-btn" aria-label="Página anterior"><i class=""></i></button>
+                        <button class="page-btn" aria-label="Página anterior">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                viewBox="0 0 256 256">
+                                <path
+                                    d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z">
+                                </path>
+                            </svg>
+                        </button>
                         <div class="page-numbers-container">
-                            <button class="page-btn">1</button>
+                            <button class="page-btn is-active">1</button>
                             <button class="page-btn">2</button>
-                            <button class="page-btn">3</button>
+                            <button class="page-btn" disabled>3</button>
                         </div>
-                        <button class="page-btn" aria-label="Próxima página"><i class=""></i></button>
+                        <button class="page-btn" aria-label="Próxima página">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                viewBox="0 0 256 256">
+                                <path
+                                    d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z">
+                                </path>
+                            </svg>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -459,25 +570,23 @@
 
         <!-- TELA DE CATEGORIAS -->
 
-        <div id="categories-view" class="app-view hidden">
+        <div id="categories-view" class="app-view">
             <header class="view-header">
                 <h1>Categorias</h1>
                 <p>Gerencie suas categorias de entrada e saída.</p>
             </header>
 
-            <button class="btn-sticky" id="btn-add-mobile" aria-label="Adicionar nova categoria">
-                <div class="btn-sticky-icons-wrapper">
-                    <i class=""></i>
-                    <i class=""></i>
-                </div>
-            </button>
-
-            <div class="view-controls">
+            <div class="categories-view-controls">
                 <div class="categories-filter" role="radiogroup" aria-label="Filtrar categorias">
                     <div class="filter-item">
                         <input type="radio" id="filter-all" name="category-filter" value="all" checked>
                         <label for="filter-all">
-                            <i class=""></i>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                viewBox="0 0 256 256">
+                                <path
+                                    d="M104,40H56A16,16,0,0,0,40,56v48a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V56A16,16,0,0,0,104,40Zm0,64H56V56h48v48Zm96-64H152a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V56A16,16,0,0,0,200,40Zm0,64H152V56h48v48Zm-96,32H56a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V152A16,16,0,0,0,104,136Zm0,64H56V152h48v48Zm96-64H152a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V152A16,16,0,0,0,200,136Zm0,64H152V152h48v48Z">
+                                </path>
+                            </svg>
                             <span>Todas</span>
                         </label>
                     </div>
@@ -485,7 +594,12 @@
                     <div class="filter-item">
                         <input type="radio" id="filter-default" name="category-filter" value="default">
                         <label for="filter-default">
-                            <i class=""></i>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                viewBox="0 0 256 256">
+                                <path
+                                    d="M208,40H48A16,16,0,0,0,32,56v56c0,52.72,25.52,84.67,46.93,102.19,23.06,18.86,46,25.26,47,25.53a8,8,0,0,0,4.2,0c1-.27,23.91-6.67,47-25.53C198.48,196.67,224,164.72,224,112V56A16,16,0,0,0,208,40Zm0,72c0,37.07-13.66,67.16-40.6,89.42A129.3,129.3,0,0,1,128,223.62a128.25,128.25,0,0,1-38.92-21.81C61.82,179.51,48,149.3,48,112l0-56,160,0ZM82.34,141.66a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32l-56,56a8,8,0,0,1-11.32,0Z">
+                                </path>
+                            </svg>
                             <span>Padrão</span>
                         </label>
                     </div>
@@ -493,21 +607,32 @@
                     <div class="filter-item">
                         <input type="radio" id="filter-mine" name="category-filter" value="mine">
                         <label for="filter-mine">
-                            <i class=""></i>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                viewBox="0 0 256 256">
+                                <path
+                                    d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z">
+                                </path>
+                            </svg>
                             <span>Minhas</span>
                         </label>
                     </div>
                 </div>
 
-                <button type="button" class="btn-primary" id="btn-add-desktop">
+                <button type="button" class="btn-primary hidden" id="btn-add-desktop">
                     <i class=""></i>
                     <span>Adicionar Categoria</span>
                 </button>
             </div>
 
             <div class="info-tag">
-                <i class=""></i>
-                <span>Uma categoria pode ser do tipo Entrada, Saída ou ambos. Isso define em quais transações ela pode
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256">
+                    <path
+                        d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z">
+                    </path>
+                </svg>
+                <span>Uma categoria pode ser do tipo Entrada, Saída ou Ambos. Isso define em quais transações
+                    ela
+                    pode
                     ser utilizada.</span>
             </div>
 
@@ -522,13 +647,67 @@
                         <li class="category-card item-readonly">
                             <div class="category-main-info">
                                 <div class="category-icon">
-                                    <i class=""></i>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                        viewBox="0 0 256 256">
+                                        <path
+                                            d="M208,40H48A16,16,0,0,0,32,56v56c0,52.72,25.52,84.67,46.93,102.19,23.06,18.86,46,25.26,47,25.53a8,8,0,0,0,4.2,0c1-.27,23.91-6.67,47-25.53C198.48,196.67,224,164.72,224,112V56A16,16,0,0,0,208,40Zm0,72c0,37.07-13.66,67.16-40.6,89.42A129.3,129.3,0,0,1,128,223.62a128.25,128.25,0,0,1-38.92-21.81C61.82,179.51,48,149.3,48,112l0-56,160,0ZM82.34,141.66a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32l-56,56a8,8,0,0,1-11.32,0Z">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <span class="category-name">Moradia</span>
+                                <span class="badge badge-both">Ambos</span>
+                            </div>
+                            <div class="category-actions">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                    viewBox="0 0 256 256">
+                                    <path
+                                        d="M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Z">
+                                    </path>
+                                </svg>
+                            </div>
+                        </li>
+                        <li class="category-card item-readonly">
+                            <div class="category-main-info">
+                                <div class="category-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                        viewBox="0 0 256 256">
+                                        <path
+                                            d="M208,40H48A16,16,0,0,0,32,56v56c0,52.72,25.52,84.67,46.93,102.19,23.06,18.86,46,25.26,47,25.53a8,8,0,0,0,4.2,0c1-.27,23.91-6.67,47-25.53C198.48,196.67,224,164.72,224,112V56A16,16,0,0,0,208,40Zm0,72c0,37.07-13.66,67.16-40.6,89.42A129.3,129.3,0,0,1,128,223.62a128.25,128.25,0,0,1-38.92-21.81C61.82,179.51,48,149.3,48,112l0-56,160,0ZM82.34,141.66a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32l-56,56a8,8,0,0,1-11.32,0Z">
+                                        </path>
+                                    </svg>
                                 </div>
                                 <span class="category-name">Moradia</span>
                                 <span class="badge badge-outcome">Saída</span>
                             </div>
                             <div class="category-actions">
-                                <i class="" title="Categoria protegida"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                    viewBox="0 0 256 256">
+                                    <path
+                                        d="M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Z">
+                                    </path>
+                                </svg>
+                            </div>
+                        </li>
+                        <li class="category-card item-readonly">
+                            <div class="category-main-info">
+                                <div class="category-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                        viewBox="0 0 256 256">
+                                        <path
+                                            d="M208,40H48A16,16,0,0,0,32,56v56c0,52.72,25.52,84.67,46.93,102.19,23.06,18.86,46,25.26,47,25.53a8,8,0,0,0,4.2,0c1-.27,23.91-6.67,47-25.53C198.48,196.67,224,164.72,224,112V56A16,16,0,0,0,208,40Zm0,72c0,37.07-13.66,67.16-40.6,89.42A129.3,129.3,0,0,1,128,223.62a128.25,128.25,0,0,1-38.92-21.81C61.82,179.51,48,149.3,48,112l0-56,160,0ZM82.34,141.66a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32l-56,56a8,8,0,0,1-11.32,0Z">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <span class="category-name">Moradia</span>
+                                <span class="badge badge-outcome">Saída</span>
+                            </div>
+                            <div class="category-actions">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                    viewBox="0 0 256 256">
+                                    <path
+                                        d="M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Z">
+                                    </path>
+                                </svg>
                             </div>
                         </li>
                     </ul>
@@ -543,17 +722,98 @@
                         <li class="category-card">
                             <div class="category-main-info">
                                 <div class="category-icon">
-                                    <i class=""></i>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                        viewBox="0 0 256 256">
+                                        <path
+                                            d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z">
+                                        </path>
+                                    </svg>
                                 </div>
                                 <span class="category-name">Freelance</span>
                                 <span class="badge badge-income">Entrada</span>
                             </div>
                             <div class="category-actions">
                                 <button class="btn-action-edit" title="Editar categoria">
-                                    <i class=""></i>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                        viewBox="0 0 256 256">
+                                        <path
+                                            d="M227.32,73.37,182.63,28.69a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H216a8,8,0,0,0,0-16H115.32l112-112A16,16,0,0,0,227.32,73.37ZM92.69,208H48V163.31l88-88L180.69,120ZM192,108.69,147.32,64l24-24L216,84.69Z">
+                                        </path>
+                                    </svg>
                                 </button>
                                 <button class="btn-action-delete" title="Excluir categoria">
-                                    <i class=""></i>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                        viewBox="0 0 256 256">
+                                        <path
+                                            d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z">
+                                        </path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </li>
+
+                        <li class="category-card">
+                            <div class="category-main-info">
+                                <div class="category-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                        viewBox="0 0 256 256">
+                                        <path
+                                            d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <span class="category-name">Freelance</span>
+                                <span class="badge badge-income">Entrada</span>
+                            </div>
+                            <div class="category-actions">
+                                <button class="btn-action-edit" title="Editar categoria">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                        viewBox="0 0 256 256">
+                                        <path
+                                            d="M227.32,73.37,182.63,28.69a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H216a8,8,0,0,0,0-16H115.32l112-112A16,16,0,0,0,227.32,73.37ZM92.69,208H48V163.31l88-88L180.69,120ZM192,108.69,147.32,64l24-24L216,84.69Z">
+                                        </path>
+                                    </svg>
+                                </button>
+                                <button class="btn-action-delete" title="Excluir categoria">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                        viewBox="0 0 256 256">
+                                        <path
+                                            d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z">
+                                        </path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </li>
+
+                        <li class="category-card">
+                            <div class="category-main-info">
+                                <div class="category-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                        viewBox="0 0 256 256">
+                                        <path
+                                            d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <span class="category-name">Freelance</span>
+                                <span class="badge badge-income">Entrada</span>
+                            </div>
+                            <div class="category-actions">
+                                <button class="btn-action-edit" title="Editar categoria">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                        viewBox="0 0 256 256">
+                                        <path
+                                            d="M227.32,73.37,182.63,28.69a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H216a8,8,0,0,0,0-16H115.32l112-112A16,16,0,0,0,227.32,73.37ZM92.69,208H48V163.31l88-88L180.69,120ZM192,108.69,147.32,64l24-24L216,84.69Z">
+                                        </path>
+                                    </svg>
+                                </button>
+                                <button class="btn-action-delete" title="Excluir categoria">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                                        viewBox="0 0 256 256">
+                                        <path
+                                            d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z">
+                                        </path>
+                                    </svg>
                                 </button>
                             </div>
                         </li>
@@ -569,19 +829,35 @@
     <div id="modal-menu" class="modal-container hidden">
         <div class="menu-drawer">
             <button class="btn-close-modal" id="btn-close-menu" aria-label="Fechar menu">
-                <i class=""></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256">
+                    <path
+                        d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z">
+                    </path>
+                </svg>
             </button>
             <nav class="modal-menu-nav">
-                <button type="button" class="menu-btn" id="btn-menu-dashboard">
-                    <i class=""></i>
+                <button type="button" class="menu-btn is-active" id="btn-menu-dashboard">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256">
+                        <path
+                            d="M100,116.43a8,8,0,0,0,4-6.93v-72A8,8,0,0,0,93.34,30,104.06,104.06,0,0,0,25.73,147a8,8,0,0,0,4.52,5.81,7.86,7.86,0,0,0,3.35.74,8,8,0,0,0,4-1.07ZM88,49.62v55.26L40.12,132.51C40,131,40,129.48,40,128A88.12,88.12,0,0,1,88,49.62ZM128,24a8,8,0,0,0-8,8v91.82L41.19,169.73a8,8,0,0,0-2.87,11A104,104,0,1,0,128,24Zm0,192a88.47,88.47,0,0,1-71.49-36.68l75.52-44a8,8,0,0,0,4-6.92V40.36A88,88,0,0,1,128,216Z">
+                        </path>
+                    </svg>
                     <span>Visão Geral</span>
                 </button>
                 <button type="button" class="menu-btn" id="btn-menu-statements">
-                    <i class=""></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256">
+                        <path
+                            d="M72,104a8,8,0,0,1,8-8h96a8,8,0,0,1,0,16H80A8,8,0,0,1,72,104Zm8,40h96a8,8,0,0,0,0-16H80a8,8,0,0,0,0,16ZM232,56V208a8,8,0,0,1-11.58,7.15L192,200.94l-28.42,14.21a8,8,0,0,1-7.16,0L128,200.94,99.58,215.15a8,8,0,0,1-7.16,0L64,200.94,35.58,215.15A8,8,0,0,1,24,208V56A16,16,0,0,1,40,40H216A16,16,0,0,1,232,56Zm-16,0H40V195.06l20.42-10.22a8,8,0,0,1,7.16,0L96,199.06l28.42-14.22a8,8,0,0,1,7.16,0L160,199.06l28.42-14.22a8,8,0,0,1,7.16,0L216,195.06Z">
+                        </path>
+                    </svg>
                     <span>Extratos</span>
                 </button>
                 <button type="button" class="menu-btn" id="btn-menu-categories">
-                    <i class=""></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256">
+                        <path
+                            d="M216,72H130.67L102.93,51.2a16.12,16.12,0,0,0-9.6-3.2H40A16,16,0,0,0,24,64V200a16,16,0,0,0,16,16H216.89A15.13,15.13,0,0,0,232,200.89V88A16,16,0,0,0,216,72Zm0,128H40V64H93.33L123.2,86.4A8,8,0,0,0,128,88h88Z">
+                        </path>
+                    </svg>
                     <span>Categorias</span>
                 </button>
             </nav>
@@ -861,8 +1137,7 @@
         </div>
     </div>
 
-    <button class="btn-sticky btn-transaction" id="btn-add-transaction-mobile"
-        aria-label="Adicionar nova transação">
+    <button class="btn-sticky btn-transaction hidden" id="btn-add-transaction-mobile" aria-label="Adicionar nova transação">
         <div class="btn-sticky-icon-wrapper">
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256">
                 <path
@@ -872,7 +1147,7 @@
         </div>
     </button>
 
-    <button class="btn-sticky btn-category hidden" id="btn-add-category-mobile" aria-label="Adicionar nova categoria">
+    <button class="btn-sticky btn-category" id="btn-add-category-mobile" aria-label="Adicionar nova categoria">
         <div class="btn-sticky-icon-wrapper">
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256">
                 <path
