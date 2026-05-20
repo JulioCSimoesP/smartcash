@@ -47,7 +47,7 @@
     <script src="script.js" defer></script>
 </head>
 
-<body class="modal-open">
+<body class="">
     <header class="main-header">
         <div class="header-wrapper">
             <a href="#dashboard" class="logo-container">
@@ -79,7 +79,7 @@
                     <p>Confira abaixo o resumo da sua vida financeira.</p>
                 </div>
 
-                <button type="button" class="btn-primary hidden" id="btn-add-desktop">
+                <button type="button" class="btn-primary hidden" id="btn-add-transaction-dashboard">
                     <i class=""></i>
                     <span>Adicionar Transação</span>
                 </button>
@@ -312,7 +312,7 @@
 
         <!-- TELA DE EXTRATOS -->
 
-        <div id="statements-view" class="app-view hidden">
+        <div id="statements-view" class="app-view">
             <header class="view-header">
                 <div class="header-content">
                     <h1>Extratos</h1>
@@ -333,7 +333,7 @@
                 </section>
 
                 <div class="actions-wrapper">
-                    <button type="button" class="btn-primary hidden" id="btn-add-desktop">
+                    <button type="button" class="btn-primary hidden" id="btn-add-transaction-statements">
                         <i class=""></i>
                         <span>Adicionar Transação</span>
                     </button>
@@ -618,7 +618,7 @@
                     </div>
                 </div>
 
-                <button type="button" class="btn-primary hidden" id="btn-add-desktop">
+                <button type="button" class="btn-primary hidden" id="btn-add-category-desktop">
                     <i class=""></i>
                     <span>Adicionar Categoria</span>
                 </button>
@@ -864,14 +864,19 @@
         </div>
     </div>
 
-    <div id="modal-transaction-form" class="modal-container hidden">
+    <div id="modal-transaction-form" class="modal-container">
         <div class="modal-content">
             <header class="modal-header">
                 <div class="modal-header-top">
                     <h3>Nova Transação</h3>
                     <button class="btn-close-modal" id="btn-close-transaction-form"
                         aria-label="Fechar formulário de nova transação">
-                        <i class=""></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                            viewBox="0 0 256 256">
+                            <path
+                                d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z">
+                            </path>
+                        </svg>
                     </button>
                 </div>
                 <p>Preencha os dados abaixo para registrar sua transação.</p>
@@ -885,34 +890,13 @@
 
                 <div class="input-row">
                     <div class="input-group">
-                        <label>Tipo</label>
-                        <div class="transaction-type-toggle">
-
-                            <button type="button" class="select-trigger" id="transaction-select-trigger">
-                                <div class="selected-value">
-                                    <i class=""></i> <span>Selecione o tipo</span>
-                                </div>
-                                <i class=""></i>
-                            </button>
-
-                            <div class="select-type-options" id="transaction-type-options-panel">
-                                <div class="type-option">
-                                    <input type="radio" id="type-income" name="transaction-type" value="income" checked>
-                                    <label for="type-income" class="label-income">
-                                        <i class=""></i>
-                                        <span>Entrada</span>
-                                    </label>
-                                </div>
-
-                                <div class="type-option">
-                                    <input type="radio" id="type-outcome" name="transaction-type" value="outcome">
-                                    <label for="type-outcome" class="label-outcome">
-                                        <i class=""></i>
-                                        <span>Saída</span>
-                                    </label>
-                                </div>
-                            </div>
-
+                        <label for="transaction-type">Tipo</label>
+                        <div class="native-select-wrapper">
+                            <select id="transaction-type" name="type" required>
+                                <option value="" disabled selected hidden>Selecione</option>
+                                <option value="income">Entrada</option>
+                                <option value="outcome">Saída</option>
+                            </select>
                         </div>
                     </div>
 
@@ -928,36 +912,20 @@
                 </div>
 
                 <div class="input-group">
-                    <label>Categoria</label>
-                    <div class="category-selection-list" role="radiogroup"
-                        aria-label="Seleção de categoria para a transação">
-
-                        <button type="button" class="select-trigger" id="category-select-trigger">
-                            <div class="selected-value">
-                                <i class=""></i> <span>Selecione uma categoria</span>
-                            </div>
-                            <i class=""></i>
-                        </button>
-
-                        <div class="select-category-options" id="category-options-panel">
-                            <div class="category-option">
-                                <input type="radio" id="category-xxxxxx" name="transaction-category" value="xxxxxx"
-                                    checked>
-                                <label for="category-xxxxxx">
-                                    <i class=""></i>
-                                    <span>category-1</span>
-                                </label>
-                            </div>
-
-                            <div class="category-option">
-                                <input type="radio" id="category-yyyyyy" name="transaction-category" value="yyyyyy">
-                                <label for="category-yyyyyy">
-                                    <i class=""></i>
-                                    <span>category-2</span>
-                                </label>
-                            </div>
-                        </div>
-
+                    <label for="transaction-category">Categoria</label>
+                    <div class="native-select-wrapper">
+                        <select id="transaction-category" name="category" required>
+                            <option value="" disabled selected hidden>Selecione</option>
+                            <optgroup label="Padrão">
+                                <option value="1">Moradia</option>
+                                <option value="2">Alimentação</option>
+                                <option value="3">Transporte</option>
+                            </optgroup>
+                            <optgroup label="Minhas">
+                                <option value="4">Freelance</option>
+                                <option value="5">Assinaturas</option>
+                            </optgroup>
+                        </select>
                     </div>
                 </div>
 
@@ -973,30 +941,51 @@
         <div class="modal-content">
             <header class="modal-header">
                 <div class="transaction-category">
-                    <i class=""></i>
-                    <span>Categoria</span>
+                    <div class="category-icon-bg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256">
+                        <path
+                            d="M48.07,104H207.93a16,16,0,0,0,15.72-19.38C216.22,49.5,176,24,128,24S39.78,49.5,32.35,84.62A16,16,0,0,0,48.07,104ZM128,40c39.82,0,74.21,20.61,79.93,48H48.07L48,87.93C53.79,60.61,88.18,40,128,40ZM229.26,152.48l-41.13,15L151,152.57a8,8,0,0,0-5.94,0l-37,14.81L71,152.57a8,8,0,0,0-5.7-.09l-44,16a8,8,0,0,0,5.47,15L40,178.69V184a40,40,0,0,0,40,40h96a40,40,0,0,0,40-40v-9.67l18.73-6.81a8,8,0,1,0-5.47-15ZM200,184a24,24,0,0,1-24,24H80a24,24,0,0,1-24-24V172.88l11.87-4.32L105,183.43a8,8,0,0,0,5.94,0l37-14.81,37,14.81a8,8,0,0,0,5.7.09l9.27-3.37ZM16,128a8,8,0,0,1,8-8H232a8,8,0,0,1,0,16H24A8,8,0,0,1,16,128Z">
+                        </path>
+                    </svg>
                 </div>
-                <button class="btn-close-modal" id="btn-close-transaction-details"
-                    aria-label="Fechar detalhes da transação">
-                    <i class=""></i>
-                </button>
-            </header>
-            <div class="modal-body">
-                <h3 class="transaction-description">Descrição da transação</h3>
-                <strong class="transaction-details-amount">R$ 9999,00</strong>
-                <time class="transaction-details-date" datetime="2026-01-01">01/01/2026</time>
-            </div>
-            <div class="transaction-details-actions">
-                <button class="btn-transaction-details" id="btn-edit-transaction">
-                    <i class=""></i>
-                    <span>Editar</span>
-                </button>
-                <button class="btn-transaction-details" id="btn-delete-transaction">
-                    <i class=""></i>
-                    <span>Excluir</span>
-                </button>
-            </div>
+                <span>Categoria</span>
         </div>
+        <button class="btn-close-modal" id="btn-close-transaction-details" aria-label="Fechar detalhes da transação">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256">
+                <path
+                    d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z">
+                </path>
+            </svg>
+        </button>
+        </header>
+        <div class="transaction-details-body">
+            <h3 class="transaction-description">Descrição da transação</h3>
+            <strong class="transaction-details-amount is-positive">+ R$ 9999,00</strong>
+            <time class="transaction-details-date" datetime="2026-01-01">01/01/2026</time>
+        </div>
+        <div class="transaction-details-actions">
+            <button class="btn-transaction-details" id="btn-edit-transaction">
+                <div class="action-icon-bg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256">
+                        <path
+                            d="M227.32,73.37,182.63,28.69a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H216a8,8,0,0,0,0-16H115.32l112-112A16,16,0,0,0,227.32,73.37ZM92.69,208H48V163.31l88-88L180.69,120ZM192,108.69,147.32,64l24-24L216,84.69Z">
+                        </path>
+                    </svg>
+                </div>
+                <span>Editar</span>
+            </button>
+            <button class="btn-transaction-details" id="btn-delete-transaction">
+                <div class="action-icon-bg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256">
+                        <path
+                            d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z">
+                        </path>
+                    </svg>
+                </div>
+                <span>Excluir</span>
+            </button>
+        </div>
+    </div>
     </div>
 
     <div id="modal-category-form" class="modal-container hidden">
@@ -1006,7 +995,12 @@
                     <h3>Nova Categoria</h3>
                     <button class="btn-close-modal" id="btn-close-category-form"
                         aria-label="Fechar formulário de nova categoria">
-                        <i class=""></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
+                            viewBox="0 0 256 256">
+                            <path
+                                d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z">
+                            </path>
+                        </svg>
                     </button>
                 </div>
                 <p>Preencha os dados abaixo para registrar sua categoria.</p>
@@ -1020,84 +1014,29 @@
 
                 <div class="input-row">
                     <div class="input-group">
-                        <label>Tipo</label>
-                        <div class="category-type-toggle">
-
-                            <button type="button" class="select-trigger" id="category-type-select-trigger">
-                                <div class="selected-value">
-                                    <i class=""></i> <span>Selecione o tipo</span>
-                                </div>
-                                <i class=""></i>
-                            </button>
-
-                            <div class="select-type-options" id="category-type-options-panel">
-                                <div class="type-option">
-                                    <input type="radio" id="type-income" name="category-type" value="income" checked>
-                                    <label for="type-income" class="label-income">
-                                        <i class=""></i>
-                                        <span>Entrada</span>
-                                    </label>
-                                </div>
-
-                                <div class="type-option">
-                                    <input type="radio" id="type-outcome" name="category-type" value="outcome">
-                                    <label for="type-outcome" class="label-outcome">
-                                        <i class=""></i>
-                                        <span>Saída</span>
-                                    </label>
-                                </div>
-
-                                <div class="type-option">
-                                    <input type="radio" id="type-both" name="category-type" value="both">
-                                    <label for="type-both" class="label-both">
-                                        <i class=""></i>
-                                        <span>Entrada e Saída</span>
-                                    </label>
-                                </div>
-                            </div>
-
+                        <label for="category-type">Tipo</label>
+                        <div class="native-select-wrapper">
+                            <select id="category-type" name="category-type" required>
+                                <option value="" disabled selected hidden>Selecione</option>
+                                <option value="income">Entrada</option>
+                                <option value="outcome">Saída</option>
+                                <option value="both">Entrada e Saída</option>
+                            </select>
                         </div>
                     </div>
 
                     <div class="input-group">
-                        <label>Ícone</label>
-
-                        <button type="button" class="icon-selector-trigger" id="btn-icon-trigger">
-                            <div class="selected-icon-display">
-                                <i class=""></i>
-                            </div>
-                            <span>Selecionar ícone</span>
-                            <i class=""></i>
-                        </button>
-
-                        <div class="icon-grid-panel" id="icon-panel">
-                            <header class="icon-panel-header">
-                                <span>Escolha um ícone</span>
-                            </header>
-
-                            <div class="icon-grid" id="icon-options-grid">
-                                <div class="icon-option">
-                                    <input type="radio" id="icon-house" name="category-icon" value="house" checked>
-                                    <label for="icon-house">
-                                        <i class=""></i>
-                                    </label>
-                                </div>
-
-                                <div class="icon-option">
-                                    <input type="radio" id="icon-car" name="category-icon" value="car">
-                                    <label for="icon-car">
-                                        <i class=""></i>
-                                    </label>
-                                </div>
-
-                                <div class="icon-option">
-                                    <input type="radio" id="icon-burger" name="category-icon" value="burger">
-                                    <label for="icon-burger">
-                                        <i class=""></i>
-                                    </label>
-                                </div>
-
-                            </div>
+                        <label for="category-icon">Ícone</label>
+                        <div class="native-select-wrapper">
+                            <select id="category-icon" name="category-icon" required>
+                                <option value="" disabled selected hidden>Selecione</option>
+                                <option value="house">Casa</option>
+                                <option value="car">Carro</option>
+                                <option value="pizza">Alimentação</option>
+                                <option value="shopping-cart">Compras</option>
+                                <option value="heart">Saúde</option>
+                                <option value="graduation-cap">Educação</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -1115,13 +1054,17 @@
         <div class="modal-content">
             <header class="modal-confirm-header">
                 <div class="warning-icon">
-                    <i class=""></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256">
+                        <path
+                            d="M236.8,188.09,149.35,36.22h0a24.76,24.76,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.35,24.35,0,0,0,40.55,224h174.9a24.35,24.35,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM222.93,203.8a8.5,8.5,0,0,1-7.48,4.2H40.55a8.5,8.5,0,0,1-7.48-4.2,7.59,7.59,0,0,1,0-7.72L120.52,44.21a8.75,8.75,0,0,1,15,0l87.45,151.87A7.59,7.59,0,0,1,222.93,203.8ZM120,144V104a8,8,0,0,1,16,0v40a8,8,0,0,1-16,0Zm20,36a12,12,0,1,1-12-12A12,12,0,0,1,140,180Z">
+                        </path>
+                    </svg>
                 </div>
-                <h3 id="confirm-title">Excluir transação?</h3>
+                <h3 id="confirm-title">Excluir transação</h3>
             </header>
             <div class="modal-body">
                 <p id="confirm-description">
-                    Você tem certeza que deseja remover esta transação?
+                    Você tem certeza que deseja remover esta transação?<br><br>
                     <strong>Essa ação não poderá ser desfeita</strong> e o valor será removido do seu saldo atual.
                 </p>
             </div>
@@ -1137,7 +1080,8 @@
         </div>
     </div>
 
-    <button class="btn-sticky btn-transaction hidden" id="btn-add-transaction-mobile" aria-label="Adicionar nova transação">
+    <button class="btn-sticky btn-transaction hidden" id="btn-add-transaction-mobile"
+        aria-label="Adicionar nova transação">
         <div class="btn-sticky-icon-wrapper">
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256">
                 <path
