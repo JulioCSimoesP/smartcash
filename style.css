@@ -1537,7 +1537,7 @@ body.modal-open {
 #modal-confirm .modal-content {
     background-color: var(--secondary-bg);
     width: 100%;
-    max-width: 420px;
+    max-width: 480px;
     border-radius: 16px;
     padding: 1rem;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
@@ -1678,8 +1678,158 @@ body.modal-open {
 
 /* Breakpoints */
 
-@media (min-width: 768px) {}
+@media (min-width: 768px) {
+    /* Components & Sections: Modals and Sticky Buttons */
+
+    #modal-transaction-details .modal-header .btn-close-modal svg{
+        width: 32px;
+        height: 32px;
+    }
+
+    .transaction-category {
+        font-size: 1.188rem;
+    }
+
+    .transaction-description {
+        font-size: 1.313rem;
+    }
+
+    .transaction-details-amount {
+        font-size: 2.375rem;
+    }
+
+    .transaction-details-date {
+        font-size: 0.9375rem;
+    }
+
+    .btn-transaction-details span {
+        font-size: 0.9375rem;
+    }
+
+    #modal-transaction-form,
+    #modal-category-form,
+    #modal-transaction-details {
+        align-items: center;
+    }
+
+    #modal-transaction-form .modal-content,
+    #modal-category-form .modal-content,
+    #modal-transaction-details .modal-content {
+        border-radius: 24px;
+        max-width: 480px;
+        padding: 1.5rem;
+    }
+
+    .modal-content .btn-close-modal {
+        width: 48px;
+        height: 48px;
+    }
+
+    .modal-header-top h3 {
+        font-size: 1.375rem;
+    }
+
+    .modal-header-top svg {
+        width: 32px;
+        height: 32px;
+    }
+
+    .modal-header p {
+        font-size: 0.9375rem;
+    }
+
+    .input-group label {
+        font-size: 0.9375rem;
+    }
+
+    .input-group input[type="text"], .input-group input[type="date"] {
+        font-size: 0.9375rem;
+    }
+
+    .native-select-wrapper select {
+        font-size: 0.9375rem;
+    }
+
+    .modal-body button[type="submit"] {
+        font-size: 1.063rem;
+    }
+
+    #modal-confirm .modal-content {
+        padding: 1.5rem;
+    }
+
+    .modal-confirm-header h3 {
+        font-size: 1.375rem;
+    }
+
+    #modal-confirm .modal-body p {
+        font-size: 0.9375rem;
+    }
+
+    .btn-confirm-cancel, .btn-confirm-delete {
+        font-size: 1.063rem;
+    }
+
+}
 
 @media (min-width: 992px) {}
 
-@media (min-width: 1100px) {}
+@media (min-width: 1100px) {
+    /* Components & Sections: Modals and Sticky Buttons */
+
+    .transaction-category {
+        font-size: 1.25rem;
+    }
+
+    .transaction-description {
+        font-size: 1.375rem;
+    }
+
+    .transaction-details-amount {
+        font-size: 2.5rem;
+    }
+
+    .transaction-details-date {
+        font-size: 1rem;
+    }
+
+    .btn-transaction-details span {
+        font-size: 1rem;
+    }
+
+    .modal-header-top h3 {
+        font-size: 1.5rem;
+    }
+
+    .modal-header p {
+        font-size: 1rem;
+    }
+
+    .input-group label {
+        font-size: 1rem;
+    }
+
+    .input-group input[type="text"], .input-group input[type="date"] {
+        font-size: 1rem;
+    }
+
+    .native-select-wrapper select {
+        font-size: 1rem;
+    }
+
+    .modal-body button[type="submit"] {
+        font-size: 1.125rem;
+    }
+
+    .modal-confirm-header h3 {
+        font-size: 1.5rem;
+    }
+
+    #modal-confirm .modal-body p {
+        font-size: 1rem;
+    }
+
+    .btn-confirm-cancel, .btn-confirm-delete {
+        font-size: 1.125rem;
+    }
+}
