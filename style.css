@@ -48,10 +48,7 @@ body {
 }
 
 a {
-    font-family: var(--font-primary);
     text-decoration: none;
-    color: var(--primary-text);
-    font-weight: 800;
 }
 
 h1 {
@@ -1679,9 +1676,95 @@ body.modal-open {
 /* Breakpoints */
 
 @media (min-width: 768px) {
+    /* Components & Sections: Main Header */
+
+    .header-wrapper {
+        padding: 0 3.75rem;
+        height: 100px;
+    }
+
+    #btn-open-menu {
+        display: none;
+    }
+
+    .menu-nav {
+        display: block !important;
+        height: 100%;
+    }
+
+    .menu-nav ul {
+        display: flex;
+        list-style: none;
+        gap: 0.5rem;
+        height: 100%;
+    }
+
+    .menu-nav ul li {
+        height: 100%;
+    }
+
+    .menu-nav ul li a {
+        font-family: var(--font-primary);
+        font-weight: 700;
+        font-size: 1.063rem;
+        color: var(--terciary-text);
+        transition: color 0.2s ease, background-color 0.2s ease;
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        height: 100%;
+        padding: 0 1rem;
+    }
+
+    .menu-nav ul li a svg {
+        width: 22px;
+        height: 22px;
+        fill: currentColor;
+        stroke: currentColor;
+        stroke-width: 0.3rem;
+        stroke-linejoin: round;
+        stroke-linecap: round;
+    }
+
+    .menu-nav ul li a:hover {
+        color: var(--primary-color);
+        background-color: rgba(99, 102, 241, 0.04);
+    }
+
+    .menu-nav ul li a.is-active {
+        color: var(--primary-color);
+        font-weight: 800;
+    }
+
+    .menu-nav ul li a::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background-color: var(--primary-color);
+        border-radius: 4px 4px 0 0;
+        opacity: 0;
+        transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .menu-nav ul li a.is-active::after {
+        opacity: 1;
+    }
+
+    .menu-nav ul li a:hover::after {
+        opacity: 0.4;
+    }
+
+    .menu-nav ul li a.is-active:hover::after {
+        opacity: 1;
+    }
+
     /* Components & Sections: Modals and Sticky Buttons */
 
-    #modal-transaction-details .modal-header .btn-close-modal svg{
+    #modal-transaction-details .modal-header .btn-close-modal svg {
         width: 32px;
         height: 32px;
     }
@@ -1742,7 +1825,8 @@ body.modal-open {
         font-size: 0.9375rem;
     }
 
-    .input-group input[type="text"], .input-group input[type="date"] {
+    .input-group input[type="text"],
+    .input-group input[type="date"] {
         font-size: 0.9375rem;
     }
 
@@ -1766,7 +1850,8 @@ body.modal-open {
         font-size: 0.9375rem;
     }
 
-    .btn-confirm-cancel, .btn-confirm-delete {
+    .btn-confirm-cancel,
+    .btn-confirm-delete {
         font-size: 1.063rem;
     }
 
@@ -1775,6 +1860,12 @@ body.modal-open {
 @media (min-width: 992px) {}
 
 @media (min-width: 1100px) {
+    /* Components & Sections: Main Header */
+
+    .menu-nav ul li a {
+        font-size: 1.125rem;
+    }
+
     /* Components & Sections: Modals and Sticky Buttons */
 
     .transaction-category {
@@ -1809,7 +1900,8 @@ body.modal-open {
         font-size: 1rem;
     }
 
-    .input-group input[type="text"], .input-group input[type="date"] {
+    .input-group input[type="text"],
+    .input-group input[type="date"] {
         font-size: 1rem;
     }
 
@@ -1829,7 +1921,8 @@ body.modal-open {
         font-size: 1rem;
     }
 
-    .btn-confirm-cancel, .btn-confirm-delete {
+    .btn-confirm-cancel,
+    .btn-confirm-delete {
         font-size: 1.125rem;
     }
 }
