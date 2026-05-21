@@ -38,7 +38,7 @@ body {
     background-color: var(--primary-bg);
     line-height: 1.6;
     color: var(--secondary-text);
-    font-weight: 500;
+    font-weight: 600;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
@@ -168,6 +168,10 @@ body.modal-open {
     display: flex;
     flex-direction: column;
     gap: 8px;
+}
+
+#btn-add-transaction-dashboard {
+    display: none;
 }
 
 .summary-wrapper {
@@ -331,7 +335,7 @@ body.modal-open {
     background-color: var(--secondary-bg);
     border: 1px solid #E2E8F0;
     border-radius: 6px;
-    padding: 0.406rem 0.75rem;
+    padding: 0.438rem 0.75rem;
     cursor: pointer;
     transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -457,11 +461,10 @@ body.modal-open {
 
 .transaction-description {
     font-size: 0.75rem;
-    display: block;
+    display: none;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    flex: 1;
     min-width: 0;
 }
 
@@ -469,6 +472,7 @@ body.modal-open {
     font-size: 0.75rem;
     width: 64px;
     text-align: center;
+    display: none;
 }
 
 .transaction-type.is-positive {
@@ -515,6 +519,10 @@ body.modal-open {
     gap: 1.5rem;
 }
 
+#btn-add-transaction-statements {
+    display: none;
+}
+
 .statements-view-controls {
     display: flex;
     flex-direction: column;
@@ -523,8 +531,9 @@ body.modal-open {
 
 .filter-wrapper {
     display: flex;
-    gap: 1rem;
+    gap: 0.75rem;
     width: 100%;
+    order: -2;
 }
 
 .filter-input {
@@ -552,6 +561,7 @@ body.modal-open {
     outline: none;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
     -webkit-appearance: none;
+    cursor: text;
 }
 
 .filter-input input[type="date"]:focus {
@@ -579,7 +589,7 @@ body.modal-open {
 
 .export-main,
 .export-toggle {
-    background-color: var(--primary-color);
+    background-color: var(--neutral-color);
     border: 1px solid #E2E8F0;
     cursor: pointer;
     transition: background-color 0.2s ease;
@@ -671,7 +681,7 @@ body.modal-open {
 }
 
 .export-menu li button:hover {
-    background-color: var(--primary-color);
+    background-color: var(--neutral-color);
     color: var(--text-highlight);
 }
 
@@ -682,7 +692,7 @@ body.modal-open {
 .export-main:active,
 .export-toggle:active,
 .export-menu li button:active {
-    background-color: #4F46E5 !important;
+    background-color: #2563EB;
 }
 
 .period-summary-card {
@@ -691,6 +701,7 @@ body.modal-open {
     padding: 1rem;
     display: flex;
     flex-direction: column;
+    order: -1;
 }
 
 .summary-stat {
@@ -946,8 +957,6 @@ body.modal-open {
     transform: scale(0.97);
     background-color: var(--primary-bg);
 }
-
-/********************************/
 
 .group-header {
     margin-bottom: 0.75rem;
@@ -1316,6 +1325,11 @@ body.modal-open {
     outline: none;
     -webkit-appearance: none;
     line-height: 1.358;
+    cursor: text;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
 }
 
 .input-group input[type="text"]:focus,
@@ -1350,14 +1364,7 @@ body.modal-open {
     transform: scale(0.98);
 }
 
-.native-select-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-    width: 100%;
-}
-
-.native-select-wrapper select {
+.input-group select {
     width: 100%;
     background-color: #EDF2F7;
     border: 1px solid transparent;
@@ -1371,13 +1378,13 @@ body.modal-open {
     line-height: 1.358;
 }
 
-.native-select-wrapper select:focus {
+.input-group select:focus {
     outline: 2px dashed var(--primary-color);
     outline-offset: 4px;
     border-radius: 4px;
 }
 
-.native-select-wrapper select:invalid {
+.input-group select:invalid {
     color: var(--terciary-text);
 }
 
@@ -1429,7 +1436,7 @@ body.modal-open {
     margin-bottom: 2.5rem;
 }
 
-.transaction-description {
+.transaction-details-description {
     font-family: var(--font-primary);
     font-weight: 700;
     font-size: 1.25rem;
@@ -1649,6 +1656,7 @@ body.modal-open {
     color: var(--text-highlight);
     z-index: 50;
     transition: transform 0.2s ease;
+    cursor: pointer;
 }
 
 .btn-transaction {
@@ -1673,9 +1681,33 @@ body.modal-open {
     transform: scale(0.9);
 }
 
+.btn-back-to-top {
+    display: none;
+}
+
 /* Breakpoints */
 
 @media (min-width: 768px) {
+    /* Global Styles */
+
+    main {
+        padding: 3.75rem 3.75rem 9.625rem 3.75rem;
+    }
+
+    /* Base Styles */
+
+    body {
+        font-size: 0.9375rem;
+    }
+
+    h1 {
+        font-size: 1.625rem;
+    }
+
+    h2 {
+        font-size: 1.375rem;
+    }
+
     /* Components & Sections: Main Header */
 
     .header-wrapper {
@@ -1762,6 +1794,249 @@ body.modal-open {
         opacity: 1;
     }
 
+    /* Components & Sections: Dashboard */
+
+    #dashboard-view section {
+        margin-top: 2rem;
+    }
+
+    .transaction-type {
+        display: block;
+    }
+
+    .summary-info .label {
+        font-size: 0.9375rem;
+    }
+
+    .summary-info .timeframe {
+        font-size: 0.813rem;
+    }
+
+    .summary-info .value {
+        font-size: 1.375rem;
+    }
+
+    .percentage-tag {
+        font-size: 0.813rem;
+    }
+
+    .comparison-label {
+        font-size: 0.813rem;
+    }
+
+    .btn-secondary-wrapper {
+        font-size: 0.9375rem;
+    }
+
+    .btn-secondary svg {
+        width: 19px;
+        height: 19px;
+    }
+
+    .info-tag {
+        font-size: 0.813rem;
+    }
+
+    .transaction-date {
+        font-size: 0.813rem;
+    }
+
+    .transaction-category-wrapper svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .category-title {
+        font-size: 0.813rem;
+    }
+
+    .transaction-description {
+        font-size: 0.813rem;
+    }
+
+    .transaction-type {
+        font-size: 0.813rem;
+    }
+
+    .transaction-amount {
+        font-size: 0.813rem;
+    }
+
+    .transaction-action svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .summary-wrapper {
+        flex-direction: row;
+    }
+
+    .summary-item {
+        flex: 1;
+        flex-direction: column;
+    }
+
+    .summary-info {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .summary-info .comparison-badge {
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 0.5rem;
+    }
+
+    .summary-icon svg {
+        width: 36px;
+        height: 36px;
+    }
+
+    .summary-info .main-values {
+        gap: 5px;
+    }
+
+    .percentage-tag svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .info-tag svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    /* Components & Sections: Statements */
+
+    #statements-view {
+        gap: 2rem;
+    }
+
+    .statements-view-controls {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: flex-end;
+    }
+
+    .filter-wrapper {
+        width: 100%;
+        max-width: 320px;
+    }
+
+    .export-split-button {
+        width: auto;
+    }
+
+    .export-main svg {
+        width: 21px;
+        height: 21px;
+    }
+
+    .export-toggle {
+        min-width: auto;
+    }
+
+    .export-toggle svg {
+        width: 21px;
+        height: 21px;
+    }
+
+    .period-summary-card {
+        flex-direction: row;
+        padding: 1.5rem;
+        width: 100%;
+        order: initial;
+    }
+
+    .summary-stat {
+        flex: 1;
+        flex-direction: column-reverse;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        padding: 0 1rem;
+        border-bottom: none !important;
+        border-right: 1px solid #E2E8F0;
+    }
+
+    .summary-stat .stat-icon svg {
+        width: 36px;
+        height: 36px;
+        padding: 0.688rem;
+    }
+
+    .period-summary-card .summary-stat:first-child {
+        padding-left: 0;
+        padding-top: 0;
+    }
+
+    .period-summary-card .summary-stat:last-child {
+        padding-right: 0;
+        padding-bottom: 0;
+        border-right: none;
+    }
+
+    .filter-input input[type="date"] {
+        font-size: 0.9375rem;
+    }
+
+    .export-main {
+        font-size: 0.9375rem;
+    }
+
+    .current-format {
+        font-size: 0.9375rem;
+    }
+
+    .export-menu li button {
+        font-size: 0.9375rem;
+    }
+
+    .stat-label {
+        font-size: 0.9375rem;
+    }
+
+    .stat-value {
+        font-size: 1.375rem;
+    }
+
+    .pagination-footer {
+        font-size: 0.813rem;
+    }
+
+    .select-wrapper select {
+        font-size: 0.813rem;
+    }
+
+    .current-shown-items {
+        font-size: 0.813rem;
+    }
+
+    .page-btn {
+        font-size: 0.813rem;
+    }
+
+    .pagination-footer {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center
+    }
+
+    /* Components & Sections: Categories */
+
+    .filter-item label {
+        font-size: 0.9375rem;
+    }
+
+    .category-name {
+        font-size: 0.9375rem;
+    }
+
+    .badge {
+        font-size: 0.813rem;
+    }
+
     /* Components & Sections: Modals and Sticky Buttons */
 
     #modal-transaction-details .modal-header .btn-close-modal svg {
@@ -1773,7 +2048,7 @@ body.modal-open {
         font-size: 1.188rem;
     }
 
-    .transaction-description {
+    .transaction-details-description {
         font-size: 1.313rem;
     }
 
@@ -1830,7 +2105,7 @@ body.modal-open {
         font-size: 0.9375rem;
     }
 
-    .native-select-wrapper select {
+    .input-group select {
         font-size: 0.9375rem;
     }
 
@@ -1855,15 +2130,278 @@ body.modal-open {
         font-size: 1.063rem;
     }
 
+    .btn-sticky {
+        right: 3.75rem;
+        bottom: 3.75rem;
+    }
+
 }
 
 @media (min-width: 992px) {}
 
 @media (min-width: 1100px) {
+    /* Global Styles */
+
+    main {
+        padding: 3.75rem 3.75rem 7.375rem 3.75rem;
+    }
+    
+    /* Base Styles */
+
+    body {
+        font-size: 1rem;
+    }
+
+    h1 {
+        font-size: 1.75rem;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+    }
+
     /* Components & Sections: Main Header */
 
     .menu-nav ul li a {
         font-size: 1.125rem;
+    }
+
+    /* Components & Sections: Dashboard */
+
+    .view-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+    }
+
+    #btn-add-transaction-dashboard {
+        display: flex;
+    }
+
+    .view-header .btn-primary {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background-color: var(--primary-color);
+        color: var(--text-highlight);
+        border: 1px solid rgb(226, 232, 240);
+        border-radius: 8px;
+        padding: 0.75rem 1.25rem;
+        font-family: var(--font-secondary);
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease, transform 0.2s ease;
+        box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.2);
+    }
+
+    .view-header .btn-primary svg {
+        width: 20px;
+        height: 20px;
+        fill: currentColor;
+        stroke: currentColor;
+        stroke-width: 0.5rem;
+        stroke-linejoin: round;
+        stroke-linecap: round;
+    }
+
+    .view-header .btn-primary:hover {
+        background-color: #4F46E5;
+    }
+
+    .view-header .btn-primary:active {
+        transform: scale(0.97);
+    }
+
+    .transaction-description {
+        display: block;
+    }
+
+    .summary-item {
+        flex-direction: row-reverse;
+        padding: 1.5rem;
+    }
+
+    .summary-info .label {
+        font-size: 1rem;
+    }
+
+    .summary-info .timeframe {
+        font-size: 0.875rem;
+    }
+
+    .summary-info .value {
+        font-size: 1.5rem;
+    }
+
+    .percentage-tag {
+        font-size: 0.875rem;
+    }
+
+    .comparison-label {
+        font-size: 0.875rem;
+    }
+
+    .btn-secondary-wrapper {
+        font-size: 1rem;
+    }
+
+    .btn-secondary svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .info-tag {
+        font-size: 0.875rem;
+    }
+
+    .info-tag svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .transaction-item {
+        padding: 1.5rem;
+    }
+
+    .transaction-date {
+        font-size: 0.875rem;
+    }
+
+    .transaction-category-wrapper svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .category-title {
+        font-size: 0.875rem;
+    }
+
+    .transaction-description {
+        font-size: 0.875rem;
+    }
+
+    .transaction-type {
+        font-size: 0.875rem;
+    }
+
+    .transaction-amount {
+        font-size: 0.875rem;
+    }
+
+    .transaction-action svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    /* Components & Sections: Statements */
+
+    .filter-input input[type="date"] {
+        font-size: 1rem;
+    }
+
+    #btn-add-transaction-statements {
+        display: flex;
+    }
+
+    .statements-view-controls .btn-primary {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background-color: var(--primary-color);
+        color: var(--text-highlight);
+        border: 1px solid rgb(226, 232, 240);
+        border-radius: 8px;
+        padding: 0.75rem 1.25rem;
+        font-family: var(--font-secondary);
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease, transform 0.2s ease;
+        box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.2);
+    }
+
+    .statements-view-controls .btn-primary svg {
+        width: 20px;
+        height: 20px;
+        fill: currentColor;
+        stroke: currentColor;
+        stroke-width: 0.5rem;
+        stroke-linejoin: round;
+        stroke-linecap: round;
+    }
+
+    .statements-view-controls .btn-primary:hover {
+        background-color: #4F46E5;
+    }
+
+    .statements-view-controls .btn-primary:active {
+        transform: scale(0.97);
+    }
+
+    .actions-wrapper {
+        flex-direction: row;
+        gap: 0.75rem;
+    }
+
+    .export-main {
+        font-size: 1rem;
+    }
+
+    .export-main svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .export-toggle svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .current-format {
+        font-size: 1rem;
+    }
+
+    .export-menu li button {
+        font-size: 1rem;
+    }
+
+    .stat-label {
+        font-size: 1rem;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+    }
+
+    .pagination-footer {
+        font-size: 0.875rem;
+    }
+
+    .select-wrapper select {
+        font-size: 0.875rem;
+    }
+
+    .current-shown-items {
+        font-size: 0.875rem;
+    }
+
+    .page-btn {
+        font-size: 0.875rem;
+    }
+
+    /* Components & Sections: Categories */
+
+    .filter-item label {
+        font-size: 1rem;
+    }
+
+    .category-name {
+        font-size: 1rem;
+    }
+
+    .badge {
+        font-size: 0.875rem;
     }
 
     /* Components & Sections: Modals and Sticky Buttons */
@@ -1872,7 +2410,7 @@ body.modal-open {
         font-size: 1.25rem;
     }
 
-    .transaction-description {
+    .transaction-details-description {
         font-size: 1.375rem;
     }
 
@@ -1905,7 +2443,7 @@ body.modal-open {
         font-size: 1rem;
     }
 
-    .native-select-wrapper select {
+    .input-group select {
         font-size: 1rem;
     }
 
@@ -1924,5 +2462,45 @@ body.modal-open {
     .btn-confirm-cancel,
     .btn-confirm-delete {
         font-size: 1.125rem;
+    }
+
+    .btn-sticky {
+        display: none;
+    }
+
+    .btn-back-to-top {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        bottom: 2.5rem;
+        right: 2.5rem;
+        width: 3rem;
+        height: 3rem;
+        background-color: var(--primary-color);
+        color: var(--text-highlight);
+        border: 1px solid #E2E8F0;
+        border-radius: 50%;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        z-index: 40;
+        transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+
+    .btn-back-to-top svg {
+        width: 24px;
+        height: 24px;
+        fill: currentColor;
+        stroke: currentColor;
+        stroke-width: 1rem;
+        stroke-linejoin: round;
+        stroke-linecap: round;
+    }
+
+    .btn-back-to-top:hover {
+        background-color: #4F46E5;
+    }
+
+    .btn-back-to-top:active {
+        transform: scale(0.92);
     }
 }
