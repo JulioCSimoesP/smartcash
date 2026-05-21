@@ -346,7 +346,7 @@
 
         <!-- TELA DE EXTRATOS -->
 
-        <div id="statements-view" class="app-view">
+        <div id="statements-view" class="app-view hidden">
             <header class="view-header">
                 <div class="header-content">
                     <h1>Extratos</h1>
@@ -609,10 +609,12 @@
 
         <!-- TELA DE CATEGORIAS -->
 
-        <div id="categories-view" class="app-view hidden">
+        <div id="categories-view" class="app-view">
             <header class="view-header">
-                <h1>Categorias</h1>
-                <p>Gerencie suas categorias de entrada e saída.</p>
+                <div class="header-content">
+                    <h1>Categorias</h1>
+                    <p>Gerencie suas categorias de entrada e saída.</p>
+                </div>
             </header>
 
             <div class="categories-view-controls">
@@ -657,8 +659,12 @@
                     </div>
                 </div>
 
-                <button type="button" class="btn-primary hidden" id="btn-add-category-desktop">
-                    <i class=""></i>
+                <button type="button" class="btn-primary" id="btn-add-category-desktop">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256">
+                        <path
+                            d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z">
+                        </path>
+                    </svg>
                     <span>Adicionar Categoria</span>
                 </button>
             </div>

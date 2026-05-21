@@ -943,8 +943,8 @@ body.modal-open {
 }
 
 .filter-item label svg {
-    width: 18px;
-    height: 18px;
+    width: 22px;
+    height: 22px;
     fill: currentColor;
 }
 
@@ -956,6 +956,10 @@ body.modal-open {
 .filter-item label:active {
     transform: scale(0.97);
     background-color: var(--primary-bg);
+}
+
+.categories-view-controls .btn-primary {
+    display: none;
 }
 
 .group-header {
@@ -2025,8 +2029,25 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
     /* Components & Sections: Categories */
 
+    .categories-view-controls {
+        margin-top: 2rem;
+    }
+
+    .categories-filter {
+        max-width: 540px;
+    }
+
     .filter-item label {
         font-size: 0.9375rem;
+    }
+
+    .filter-item label svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .categories-wrapper>* {
+        margin-top: 2rem;
     }
 
     .category-name {
@@ -2035,6 +2056,17 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
     .badge {
         font-size: 0.813rem;
+    }
+
+    .item-readonly .category-actions svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .btn-action-edit svg,
+    .btn-action-delete svg {
+        width: 20px;
+        height: 20px;
     }
 
     /* Components & Sections: Modals and Sticky Buttons */
@@ -2137,7 +2169,20 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 }
 
-@media (min-width: 992px) {}
+@media (min-width: 992px) {
+    /* Components & Sections: Categories */
+
+    .category-list {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .category-card {
+        flex: 0 0 calc(50% - (0.75rem / 2));
+        margin: 0;
+    }
+}
 
 @media (min-width: 1100px) {
     /* Global Styles */
@@ -2145,7 +2190,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     main {
         padding: 3.75rem 3.75rem 7.375rem 3.75rem;
     }
-    
+
     /* Base Styles */
 
     body {
@@ -2186,7 +2231,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         color: var(--text-highlight);
         border: 1px solid rgb(226, 232, 240);
         border-radius: 8px;
-        padding: 0.75rem 1.25rem;
+        padding: 0.813rem 1.25rem;
         font-family: var(--font-secondary);
         font-weight: 600;
         font-size: 1rem;
@@ -2396,12 +2441,74 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         font-size: 1rem;
     }
 
+    .filter-item label svg {
+        width: 25px;
+        height: 25px;
+    }
+
+    #btn-add-transaction-statements {
+        display: flex;
+    }
+
+    .categories-view-controls {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-end;
+    }
+
+    .categories-view-controls .btn-primary {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background-color: var(--primary-color);
+        color: var(--text-highlight);
+        border: 1px solid rgb(226, 232, 240);
+        border-radius: 8px;
+        padding: 0.813rem 1.25rem;
+        font-family: var(--font-secondary);
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease, transform 0.2s ease;
+        box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.2);
+    }
+
+    .categories-view-controls .btn-primary svg {
+        width: 20px;
+        height: 20px;
+        fill: currentColor;
+        stroke: currentColor;
+        stroke-width: 0.5rem;
+        stroke-linejoin: round;
+        stroke-linecap: round;
+    }
+
+    .categories-view-controls .btn-primary:hover {
+        background-color: #4F46E5;
+    }
+
+    .categories-view-controls .btn-primary:active {
+        transform: scale(0.97);
+    }
+
     .category-name {
         font-size: 1rem;
     }
 
     .badge {
         font-size: 0.875rem;
+    }
+
+    .item-readonly .category-actions svg {
+        width: 21px;
+        height: 21px;
+    }
+
+    .btn-action-edit svg,
+    .btn-action-delete svg {
+        width: 21px;
+        height: 21px;
     }
 
     /* Components & Sections: Modals and Sticky Buttons */
