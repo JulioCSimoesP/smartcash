@@ -245,7 +245,7 @@
                         <span>Exibindo as 10 últimas transações</span>
                     </div>
                     <ul class="history-list">
-                        <li class="transaction-item" role="button" tabindex="0"
+                        <li class="transaction-item" data-id="uuid-da-transacao-123" role="button" tabindex="0"
                             aria-label="Detalhes da transação: Compra no mercado">
 
                             <time class="transaction-date" datetime="2026-05-10">10/05/2026</time>
@@ -276,7 +276,7 @@
                             </div>
                         </li>
 
-                        <li class="transaction-item" role="button" tabindex="0"
+                        <li class="transaction-item" data-id="uuid-da-transacao-456" role="button" tabindex="0"
                             aria-label="Detalhes da transação: Compra no mercado">
 
                             <time class="transaction-date" datetime="2026-05-10">10/05/2026</time>
@@ -307,7 +307,7 @@
                             </div>
                         </li>
 
-                        <li class="transaction-item" role="button" tabindex="0"
+                        <li class="transaction-item" data-id="uuid-da-transacao-789" role="button" tabindex="0"
                             aria-label="Detalhes da transação: Compra no mercado">
 
                             <time class="transaction-date" datetime="2026-05-10">10/05/2026</time>
@@ -388,7 +388,7 @@
                             <span>Exportar dados</span>
                         </button>
 
-                        <button type="button" id="btn-export-toggle" class="export-toggle" aria-haspopup="true"
+                        <button type="button" id="btn-export-toggle" class="export-toggle" data-format="csv" aria-haspopup="true"
                             aria-expanded="false" aria-label="Escolher formato de exportação">
                             <span class="current-format">CSV</span>
                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
@@ -399,9 +399,9 @@
                             </svg>
                         </button>
 
-                        <ul class="export-menu hidden" id="export-options">
-                            <li><button type="button" data-format="csv">CSV</button></li>
-                            <li><button type="button" data-format="pdf">PDF</button></li>
+                        <ul class="export-menu hidden" id="export-menu-options">
+                            <li><button class="export-option" type="button" data-format="csv">CSV</button></li>
+                            <li><button class="export-option" type="button" data-format="pdf">PDF</button></li>
                         </ul>
                     </div>
                 </div>
@@ -471,7 +471,7 @@
 
             <div class="history-wrapper">
                 <ul class="history-list">
-                    <li class="transaction-item" role="button" tabindex="0"
+                    <li class="transaction-item" data-id="uuid-da-transacao-abc" role="button" tabindex="0"
                         aria-label="Detalhes da transação: Compra no mercado">
 
                         <time class="transaction-date" datetime="2026-05-10">10/05/2026</time>
@@ -502,7 +502,7 @@
                         </div>
                     </li>
 
-                    <li class="transaction-item" role="button" tabindex="0"
+                    <li class="transaction-item" data-id="uuid-da-transacao-def" role="button" tabindex="0"
                         aria-label="Detalhes da transação: Compra no mercado">
 
                         <time class="transaction-date" datetime="2026-05-10">10/05/2026</time>
@@ -533,7 +533,7 @@
                         </div>
                     </li>
 
-                    <li class="transaction-item" role="button" tabindex="0"
+                    <li class="transaction-item" data-id="uuid-da-transacao-ghi" role="button" tabindex="0"
                         aria-label="Detalhes da transação: Compra no mercado">
 
                         <time class="transaction-date" datetime="2026-05-10">10/05/2026</time>
@@ -689,7 +689,7 @@
                         <p>Categorias padrão não podem ser editadas ou apagadas.</p>
                     </header>
                     <ul class="category-list">
-                        <li class="category-card item-readonly">
+                        <li class="category-card  item-readonly" data-id="uuid-da-categoria-123">
                             <div class="category-main-info">
                                 <div class="category-icon">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
@@ -711,7 +711,7 @@
                                 </svg>
                             </div>
                         </li>
-                        <li class="category-card item-readonly">
+                        <li class="category-card item-readonly" data-id="uuid-da-categoria-456">
                             <div class="category-main-info">
                                 <div class="category-icon">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
@@ -733,7 +733,7 @@
                                 </svg>
                             </div>
                         </li>
-                        <li class="category-card item-readonly">
+                        <li class="category-card item-readonly" data-id="uuid-da-categoria-789">
                             <div class="category-main-info">
                                 <div class="category-icon">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
@@ -764,7 +764,7 @@
                         <p>Categorias criadas por você. É possível editar ou apagar.</p>
                     </header>
                     <ul class="category-list">
-                        <li class="category-card">
+                        <li class="category-card" data-id="uuid-da-categoria-abc">
                             <div class="category-main-info">
                                 <div class="category-icon">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
@@ -797,7 +797,7 @@
                             </div>
                         </li>
 
-                        <li class="category-card">
+                        <li class="category-card" data-id="uuid-da-categoria-def">
                             <div class="category-main-info">
                                 <div class="category-icon">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
@@ -830,7 +830,7 @@
                             </div>
                         </li>
 
-                        <li class="category-card">
+                        <li class="category-card" data-id="uuid-da-categoria-ghi">
                             <div class="category-main-info">
                                 <div class="category-icon">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
@@ -913,7 +913,7 @@
         <div class="modal-content">
             <header class="modal-header">
                 <div class="modal-header-top">
-                    <h3>Nova Transação</h3>
+                    <h3 class="transaction-form-title"></h3>
                     <button class="btn-close-modal" id="btn-close-transaction-form"
                         aria-label="Fechar formulário de nova transação">
                         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
@@ -924,7 +924,7 @@
                         </svg>
                     </button>
                 </div>
-                <p>Preencha os dados abaixo para registrar sua transação.</p>
+                <p class="transaction-form-description"></p>
             </header>
 
             <form id="transaction-form" class="modal-body">
@@ -971,9 +971,7 @@
                     </select>
                 </div>
 
-                <button type="submit" class="btn-primary">
-                    Registrar Transação
-                </button>
+                <button type="submit" class="btn-primary"></button>
             </form>
 
         </div>
@@ -1038,7 +1036,7 @@
         <div class="modal-content">
             <header class="modal-header">
                 <div class="modal-header-top">
-                    <h3>Nova Categoria</h3>
+                    <h3 class="category-form-title"></h3>
                     <button class="btn-close-modal" id="btn-close-category-form"
                         aria-label="Fechar formulário de nova categoria">
                         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
@@ -1049,7 +1047,7 @@
                         </svg>
                     </button>
                 </div>
-                <p>Preencha os dados abaixo para registrar sua categoria.</p>
+                <p class="category-form-description"></p>
             </header>
 
             <form id="category-form" class="modal-body">
@@ -1083,9 +1081,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn-primary">
-                    Registrar Categoria
-                </button>
+                <button type="submit" class="btn-primary"></button>
             </form>
 
         </div>
@@ -1102,12 +1098,10 @@
                         </path>
                     </svg>
                 </div>
-                <h3 id="confirm-title">Excluir transação</h3>
+                <h3 id="confirm-title"></h3>
             </header>
             <div class="modal-body">
                 <p id="confirm-description">
-                    Você tem certeza que deseja remover esta transação?<br><br>
-                    <strong>Essa ação não poderá ser desfeita</strong> e o valor será removido do seu saldo atual.
                 </p>
             </div>
             <footer class="modal-footer">
