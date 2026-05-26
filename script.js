@@ -6,6 +6,8 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 let abortController = new AbortController();
+let selectedTransactionId = null;
+let selectedCategoryId = null;
 
 /* Script para controle de navegação entre as views */
 
@@ -22,6 +24,7 @@ function showView(viewId) {
     closeTransactionModal();
     closeCategoryModal();
     closeTransactionDetailsModal();
+    closeExportMenu();
     closeConfirmModal();
 }
 
@@ -107,7 +110,7 @@ const openTransactionFormButtons = [
     document.getElementById('btn-add-transaction-statements'),
     document.getElementById('btn-add-transaction-mobile')
 ];
-let selectedTransactionId = null;
+const transactionForm = modalTransactionForm.querySelector('#transaction-form');
 
 function openTransactionModal(transaction = null) {
     const title = modalTransactionForm.querySelector('.transaction-form-title');
@@ -158,10 +161,22 @@ modalTransactionForm.addEventListener('click', (event) => {
 modalTransactionForm.addEventListener('submit', (event) => {
     event.preventDefault();
 
+    const formData = new FormData(transactionForm);
+    const rawData = Object.fromEntries(formData.entries());
+    const cleanData = SanitizationService.cleanTransaction(rawData);
+    const validationResult = ValidationService.validateTransaction(cleanData);
+
+    if (!validationResult.isValid) {
+        alert("Por favor, corrija os seguintes erros:\n\n" + validationResult.errors.join("\n"));
+        return;
+    }
+
+    console.log("Dados do formulário:", cleanData);
+
     if (selectedTransactionId) {
         // Lógica para editar a transação
     } else {
-        // Lógica para registrar uma nova transação
+        StorageService.addTransaction(cleanData);
     }
 
     closeTransactionModal();
@@ -175,7 +190,6 @@ const openCategoryFormButtons = [
     document.getElementById('btn-add-category-desktop'),
     document.getElementById('btn-add-category-mobile')
 ];
-let selectedCategoryId = null;
 
 function openCategoryModal(category = null) {
     const title = modalCategoryForm.querySelector('.category-form-title');
@@ -389,6 +403,10 @@ function toggleExportMenu() {
     exportMenuOptions.classList.toggle('hidden');
 }
 
+function closeExportMenu() {
+    exportMenuOptions.classList.add('hidden');
+}
+
 function exportData(format) {
     console.log("Exportando dados no formato:", format);
     /* Lógica para exportar os dados no formato selecionado */
@@ -410,3 +428,164 @@ btnExportAction.addEventListener('click', () => {
     const format = btnExportToggle.dataset.format;
     exportData(format);
 });
+
+/* Script para controle do botão de voltar ao topo */
+
+const btnBackToTop = document.querySelector('.btn-back-to-top');
+
+window.addEventListener('scroll', () => {
+    if (window.scrollY > 300) {
+        btnBackToTop.classList.add('is-visible');
+    } else {
+        btnBackToTop.classList.remove('is-visible');
+    }
+});
+
+btnBackToTop.addEventListener('click', () => {
+    event.preventDefault();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+/* Script de controle do LocalStorage para persistência de dados */
+
+const StorageService = {
+    get(key) {
+        const data = localStorage.getItem(key);
+        return data ? JSON.parse(data) : [];
+    },
+
+    save(key, data) {
+        localStorage.setItem(key, JSON.stringify(data));
+    },
+
+    addTransaction(transactionData) {
+        const transactionsArray = this.get('transactions');
+        const newTransaction = ModelService.createTransaction(transactionData);
+        transactionsArray.push(newTransaction);
+        this.save('transactions', transactionsArray);
+    },
+
+    getTransactions() {
+        return this.get('transactions');
+    }
+};
+
+const ModelService = {
+    createTransaction(data) {
+        return {
+            id: crypto.randomUUID(),
+            description: data.description,
+            amount: data.amount,
+            date: data.date,
+            categoryId: data.categoryId
+        };
+    },
+
+    createCategory(data) {
+        return {
+            id: crypto.randomUUID(),
+            name: data.name,
+            iconName: data.iconName || 'default-icon',
+            type: data.type,
+            isDefault: data.isDefault || false
+        };
+    }
+};
+
+const Utils = {
+    formatCurrency: (cents) => {
+        return (cents / 100).toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    },
+
+    parseCurrency: (value) => {
+        if (/[a-zA-Z]/.test(value)) {
+            return 0;
+        }
+
+        const outputValue = parseInt(value.replace(/\D/g, ''), 10);
+
+        if (isNaN(outputValue)) {
+            return 0;
+        }
+
+        return outputValue;
+    }
+};
+
+const SanitizationService = {
+    stripHTML(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    },
+
+    cleanDate(dateString) {
+        const date = new Date(dateString);
+
+        if (date instanceof Date && !isNaN(date)) {
+            return dateString;
+        }
+
+        return new Date().toISOString().split('T')[0];
+    },
+
+    cleanType(value) {
+        if (value === 'income') return true;
+        if (value === 'outcome') return false;
+        return false;
+    },
+
+    cleanTransaction(data) {
+        const rawAmount = Math.abs(Utils.parseCurrency(data.amount) || 0);
+        const isIncome = this.cleanType(data.type);
+        const finalAmount = isIncome ? rawAmount : -rawAmount;
+
+        return {
+            description: this.stripHTML(data.description).trim(),
+            amount: finalAmount,
+            date: this.cleanDate(data.date),
+            categoryId: this.stripHTML(data.categoryId).trim()
+        };
+    }
+};
+
+const ValidationService = {
+    validateTransaction(data) {
+        const errors = [];
+        const MAX_DESC_LENGTH = 50;
+
+        if (!data.description || data.description.length < 3) {
+            errors.push("A descrição deve ter pelo menos 3 caracteres.");
+        }
+
+        if (data.description.length > MAX_DESC_LENGTH) {
+            errors.push(`A descrição não pode ter mais de ${MAX_DESC_LENGTH} caracteres.`);
+        }
+
+        if (isNaN(data.amount) || data.amount === 0) {
+            errors.push("O valor deve ser um número e deve ser diferente de zero.");
+        }
+
+        const today = new Date().toISOString().split('T')[0];
+        if (data.date > today) {
+            errors.push("Não é permitido registrar transações com datas futuras.");
+        }
+
+        /* Validação de categoria comentada por enquanto, pois o modelo de categorias ainda não está implementado. */
+        // const categories = StorageService.getCategories();
+        // const categoryExists = categories.find(c => c.id === data.categoryId);
+        // if (!categoryExists) {
+        //     errors.push("Categoria selecionada inválida.");
+        // }
+
+        return {
+            isValid: errors.length === 0,
+            errors: errors
+        };
+    }
+};

@@ -2594,7 +2594,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         border-radius: 50%;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         z-index: 40;
-        transition: transform 0.2s ease, background-color 0.2s ease;
+        opacity: 0;
+        visibility: hidden;
+        transition: transform 0.2s ease, background-color 0.2s ease, opacity 0.3s ease, visibility 0.3s ease;
     }
 
     .btn-back-to-top svg {
@@ -2613,5 +2615,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
     .btn-back-to-top:active {
         transform: scale(0.92);
+    }
+
+    .btn-back-to-top.is-visible {
+        opacity: 1;
+        visibility: visible;
     }
 }
