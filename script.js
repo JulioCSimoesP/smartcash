@@ -9,25 +9,16 @@ const StorageService = {
     save(key, data) {
         localStorage.setItem(key, JSON.stringify(data));
     },
+};
 
-    addTransaction(transactionData) {
-        const transactionsArray = this.get('transactions');
-        const newTransaction = ModelService.createTransaction(transactionData);
-        transactionsArray.push(newTransaction);
-        this.save('transactions', transactionsArray);
-    },
-
-    getTransactions() {
-        return this.get('transactions');
-    },
-
+const SettingsService = {
     getItemsPerPage() {
-        const itemsPerPage = this.get('itemsPerPage');
+        const itemsPerPage = StorageService.get('itemsPerPage');
         return itemsPerPage ? parseInt(itemsPerPage, 10) : 10;
     },
 
     setItemsPerPage(value) {
-        this.save('itemsPerPage', value);
+        StorageService.save('itemsPerPage', value);
     }
 };
 
@@ -158,13 +149,46 @@ const ValidationService = {
 /* Script para controle de exibição de transações */
 
 const TransactionService = {
-    getAll() {
-        const transactions = StorageService.getTransactions();
+    _getRawTransactions() {
+        return StorageService.get('transactions') || [];
+    },
+
+    getAllTransactions() {
+        const transactions = this._getRawTransactions();
         return transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
     },
 
+    getTransactionById(id) {
+        const transactions = this._getRawTransactions();
+        return transactions.find(t => t.id === id);
+    },
+
+    addTransaction(transactionData) {
+        const transactionsArray = this._getRawTransactions();
+        const newTransaction = ModelService.createTransaction(transactionData);
+
+        transactionsArray.push(newTransaction);
+        StorageService.save('transactions', transactionsArray);
+    },
+
+    updateTransaction(id, updatedData) {
+        const transactions = this._getRawTransactions();
+        const index = transactions.findIndex(t => t.id === id);
+        console.log(updatedData);
+        if (index !== -1) {
+            transactions[index] = { id, ...updatedData };
+            StorageService.save('transactions', transactions);
+        }
+    },
+
+    deleteTransaction(id) {
+        let transactions = this._getRawTransactions();
+        transactions = transactions.filter(t => t.id !== id);
+        StorageService.save('transactions', transactions);
+    },
+
     getFilteredAndPaginated(dateFilter = {}, pagination = {}) {
-        let list = this.getAll();
+        let list = this.getAllTransactions();
         const from = dateFilter.dateFrom || DateService.getFirstDayOfMonth();
         const to = dateFilter.dateTo || DateService.getToday();
 
@@ -191,7 +215,18 @@ const DateService = {
 
     getToday() {
         return new Date().toLocaleDateString('en-CA');
-    }
+    },
+
+    getPreviousMonthRange() {
+        const now = new Date();
+        const start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const end = new Date(now.getFullYear(), now.getMonth(), 0);
+        return {
+            from: start.toLocaleDateString('en-CA'),
+            to: end.toLocaleDateString('en-CA')
+        };
+    },
+
 };
 
 const Renderer = {
@@ -214,7 +249,7 @@ const Renderer = {
 
         transactions.forEach(t => {
             const categoryData = this.getCategoryData(t.categoryId);
-            const categoryIcon = iconMap[categoryData.iconName] || iconMap['default-icon'];
+            const categoryIcon = categoryIconMap[categoryData.iconName] || categoryIconMap['default-icon'];
 
             const card = document.createElement('li');
             card.className = 'transaction-item';
@@ -275,7 +310,7 @@ let selectedTransactionId = null;
 let selectedCategoryId = null;
 let currentPagination = {
     page: 1,
-    itemsPerPage: StorageService.getItemsPerPage() || 10
+    itemsPerPage: SettingsService.getItemsPerPage() || 10
 };
 let dateFilters = {
     from: DateService.getFirstDayOfMonth(),
@@ -287,7 +322,7 @@ window.addEventListener('DOMContentLoaded', () => {
     showView(defaultViewId);
 });
 
-const iconMap = {
+const categoryIconMap = {
     aperto_mao: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M254.3,107.91,228.78,56.85a16,16,0,0,0-21.47-7.15L182.44,62.13,130.05,48.27a8.14,8.14,0,0,0-4.1,0L73.56,62.13,48.69,49.7a16,16,0,0,0-21.47,7.15L1.7,107.9a16,16,0,0,0,7.15,21.47l27,13.51,55.49,39.63a8.06,8.06,0,0,0,2.71,1.25l64,16a8,8,0,0,0,7.6-2.1l55.07-55.08,26.42-13.21a16,16,0,0,0,7.15-21.46Zm-54.89,33.37L165,113.72a8,8,0,0,0-10.68.61C136.51,132.27,116.66,130,104,122L147.24,80h31.81l27.21,54.41ZM41.53,64,62,74.22,36.43,125.27,16,115.06Zm116,119.13L99.42,168.61l-49.2-35.14,28-56L128,64.28l9.8,2.59-45,43.68-.08.09a16,16,0,0,0,2.72,24.81c20.56,13.13,45.37,11,64.91-5L188,152.66Zm62-57.87-25.52-51L214.47,64,240,115.06Zm-87.75,92.67a8,8,0,0,1-7.75,6.06,8.13,8.13,0,0,1-1.95-.24L80.41,213.33a7.89,7.89,0,0,1-2.71-1.25L51.35,193.26a8,8,0,0,1,9.3-13l25.11,17.94L126,208.24A8,8,0,0,1,131.82,217.94Z"></path></svg>`,
     aviao: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M235.58,128.84,160,91.06V48a32,32,0,0,0-64,0V91.06L20.42,128.84A8,8,0,0,0,16,136v32a8,8,0,0,0,9.57,7.84L96,161.76v18.93L82.34,194.34A8,8,0,0,0,80,200v32a8,8,0,0,0,11,7.43l37-14.81,37,14.81A8,8,0,0,0,176,232V200a8,8,0,0,0-2.34-5.66L160,180.69V161.76l70.43,14.08A8,8,0,0,0,240,168V136A8,8,0,0,0,235.58,128.84ZM224,158.24l-70.43-14.08A8,8,0,0,0,144,152v32a8,8,0,0,0,2.34,5.66L160,203.31v16.87l-29-11.61a8,8,0,0,0-5.94,0L96,220.18V203.31l13.66-13.65A8,8,0,0,0,112,184V152a8,8,0,0,0-9.57-7.84L32,158.24v-17.3l75.58-37.78A8,8,0,0,0,112,96V48a16,16,0,0,1,32,0V96a8,8,0,0,0,4.42,7.16L224,140.94Z"></path></svg>`,
     balanca: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M239.43,133l-32-80h0a8,8,0,0,0-9.16-4.84L136,62V40a8,8,0,0,0-16,0V65.58L54.26,80.19A8,8,0,0,0,48.57,85h0v.06L16.57,165a7.92,7.92,0,0,0-.57,3c0,23.31,24.54,32,40,32s40-8.69,40-32a7.92,7.92,0,0,0-.57-3L66.92,93.77,120,82V208H104a8,8,0,0,0,0,16h48a8,8,0,0,0,0-16H136V78.42L187,67.1,160.57,133a7.92,7.92,0,0,0-.57,3c0,23.31,24.54,32,40,32s40-8.69,40-32A7.92,7.92,0,0,0,239.43,133ZM56,184c-7.53,0-22.76-3.61-23.93-14.64L56,109.54l23.93,59.82C78.76,180.39,63.53,184,56,184Zm144-32c-7.53,0-22.76-3.61-23.93-14.64L200,77.54l23.93,59.82C222.76,148.39,207.53,152,200,152Z"></path></svg>`,
@@ -349,7 +384,12 @@ const iconMap = {
     'default-icon': `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M71.59,61.47a8,8,0,0,0-15.18,0l-40,120A8,8,0,0,0,24,192h80a8,8,0,0,0,7.59-10.53ZM35.1,176,64,89.3,92.9,176ZM208,76a52,52,0,1,0-52,52A52.06,52.06,0,0,0,208,76Zm-88,0a36,36,0,1,1,36,36A36,36,0,0,1,120,76Zm104,68H136a8,8,0,0,0-8,8v56a8,8,0,0,0,8,8h88a8,8,0,0,0,8-8V152A8,8,0,0,0,224,144Zm-8,56H144V160h72Z"></path></svg>`
 };
 
-/* Script para controle de navegação entre as views */
+const utilityIconMap = {
+    arrow_down: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"> <path d="M205.66,149.66l-72,72a8,8,0,0,1-11.32,0l-72-72a8,8,0,0,1,11.32-11.32L120,196.69V40a8,8,0,0,1,16,0V196.69l58.34-58.35a8,8,0,0,1,11.32,11.32Z"> </path> </svg>`,
+    arrow_up: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"> <path d="M205.66,117.66a8,8,0,0,1-11.32,0L136,59.31V216a8,8,0,0,1-16,0V59.31L61.66,117.66a8,8,0,0,1-11.32-11.32l72-72a8,8,0,0,1,11.32,0l72,72A8,8,0,0,1,205.66,117.66Z"> </path> </svg>`,
+};
+
+/* Script para controle das views */
 
 const views = document.querySelectorAll('.app-view');
 const navLinks = document.querySelectorAll('.nav-link, .menu-btn, .logo-link, .btn-redirect');
@@ -381,10 +421,14 @@ function updateViewContent(viewId) {
         Renderer.renderTransactions(data.data, 'dashboard-transaction-list');
 
         const titleElement = document.getElementById('history-title');
+        const infoTag = document.getElementById('history-info-tag');
         const currentMonth = Utils.formatMonthYear(DateService.getFirstDayOfMonth());
 
         const formattedTitle = currentMonth.charAt(0).toUpperCase() + currentMonth.slice(1);
         titleElement.textContent = `Histórico - ${formattedTitle}`;
+        infoTag.textContent = `Exibindo as 10 últimas transações do mês de ${formattedTitle}`;
+
+        updateDashboardSummary();
     }
     else if (viewId === 'statements-view') {
         document.getElementById('date-from').value = dateFilters.from;
@@ -397,7 +441,166 @@ function updateViewContent(viewId) {
         updatePaginationInfo(data);
         updatePaginationSelect();
         updatePaginationButtons(data);
+        updateStatementsSummary();
     }
+}
+
+function updateDashboardSummary() {
+    const now = new Date();
+    const currentMonthFrom = DateService.getFirstDayOfMonth();
+    const currentMonthTo = DateService.getToday();
+    const prevMonthRange = DateService.getPreviousMonthRange();
+
+    const allTransactions = TransactionService.getAllTransactions();
+
+    const currentMonthList = allTransactions.filter(t => t.date >= currentMonthFrom && t.date <= currentMonthTo);
+    const prevMonthList = allTransactions.filter(t => t.date >= prevMonthRange.from && t.date <= prevMonthRange.to);
+
+    const currentIncome = currentMonthList.filter(t => t.amount > 0).reduce((acc, t) => acc + t.amount, 0);
+    const currentOutcome = currentMonthList.filter(t => t.amount < 0).reduce((acc, t) => acc + t.amount, 0);
+    const prevIncome = prevMonthList.filter(t => t.amount > 0).reduce((acc, t) => acc + t.amount, 0);
+    const prevOutcome = prevMonthList.filter(t => t.amount < 0).reduce((acc, t) => acc + t.amount, 0);
+    const totalBalance = currentIncome + currentOutcome;
+    const prevTotalBalance = prevIncome + prevOutcome;
+
+    const incomeValueElem = document.querySelector('.card-incomes .value');
+    const outcomeValueElem = document.querySelector('.card-outcomes .value');
+    const balanceValueElem = document.querySelector('.card-balance .value');
+    const balanceCard = document.querySelector('.card-balance');
+
+    const incomeBadge = document.querySelector('.card-incomes .percentage-tag');
+    const outcomeBadge = document.querySelector('.card-outcomes .percentage-tag');
+    const balanceBadge = document.querySelector('.card-balance .percentage-tag');
+
+    if (incomeValueElem) incomeValueElem.textContent = `+${Utils.formatCurrency(currentIncome)}`;
+    if (outcomeValueElem) outcomeValueElem.textContent = Utils.formatCurrency(currentOutcome);
+    if (balanceValueElem) balanceValueElem.textContent = Utils.formatCurrency(totalBalance);
+    if (balanceCard) balanceCard.classList.toggle('is-negative', totalBalance < 0);
+
+    if (incomeBadge) {
+        if (prevMonthList.length === 0) {
+            incomeBadge.innerHTML = '-';
+            incomeBadge.className = 'percentage-tag is-neutral';
+        } else if (prevIncome === 0) {
+            if (currentIncome > prevIncome) {
+                incomeBadge.innerHTML = `${utilityIconMap.arrow_up} Alta`;
+                incomeBadge.className = 'percentage-tag is-positive';
+            } else if (currentIncome < prevIncome) {
+                incomeBadge.innerHTML = `${utilityIconMap.arrow_down} Queda`;
+                incomeBadge.className = 'percentage-tag is-negative';
+            } else {
+                incomeBadge.innerHTML = `= Zero`;
+                incomeBadge.className = 'percentage-tag is-neutral';
+            }
+        } else {
+            const diff = currentIncome - prevIncome;
+            const percent = (diff / prevIncome) * 100;
+
+            if (currentIncome > prevIncome) {
+                incomeBadge.innerHTML = `${utilityIconMap.arrow_up} ${Math.abs(percent).toFixed(1)}%`;
+                incomeBadge.className = 'percentage-tag is-positive';
+            } else if (currentIncome < prevIncome) {
+                incomeBadge.innerHTML = `${utilityIconMap.arrow_down} ${Math.abs(percent).toFixed(1)}%`;
+                incomeBadge.className = 'percentage-tag is-negative';
+            } else {
+                incomeBadge.innerHTML = `=`;
+                incomeBadge.className = 'percentage-tag is-neutral';
+            }
+        }
+    }
+
+    if (outcomeBadge) {
+        if (prevMonthList.length === 0) {
+            outcomeBadge.innerHTML = '-';
+            outcomeBadge.className = 'percentage-tag is-neutral';
+        } else if (prevOutcome === 0) {
+            if (currentOutcome < prevOutcome) {
+                outcomeBadge.innerHTML = `${utilityIconMap.arrow_up} Alta`;
+                outcomeBadge.className = 'percentage-tag is-negative';
+            } else if (currentOutcome > prevOutcome) {
+                outcomeBadge.innerHTML = `${utilityIconMap.arrow_down} Queda`;
+                outcomeBadge.className = 'percentage-tag is-positive';
+            } else {
+                outcomeBadge.innerHTML = `= Zero`;
+                outcomeBadge.className = 'percentage-tag is-neutral';
+            }
+        } else {
+            const diff = currentOutcome - prevOutcome;
+            const percent = (diff / prevOutcome) * 100;
+
+            if (currentOutcome < prevOutcome) {
+                outcomeBadge.innerHTML = `${utilityIconMap.arrow_up} ${Math.abs(percent).toFixed(1)}%`;
+                outcomeBadge.className = 'percentage-tag is-negative';
+            } else if (currentOutcome > prevOutcome) {
+                outcomeBadge.innerHTML = `${utilityIconMap.arrow_down} ${Math.abs(percent).toFixed(1)}%`;
+                outcomeBadge.className = 'percentage-tag is-positive';
+            } else {
+                outcomeBadge.innerHTML = `=`;
+                outcomeBadge.className = 'percentage-tag is-neutral';
+            }
+        }
+    }
+
+    if (balanceBadge) {
+        if (prevMonthList.length === 0) {
+            balanceBadge.innerHTML = '-';
+            balanceBadge.className = 'percentage-tag is-neutral';
+        } else if (prevTotalBalance === 0) {
+            if (totalBalance > 0) {
+                balanceBadge.innerHTML = `${utilityIconMap.arrow_up} Alta`;
+                balanceBadge.className = 'percentage-tag is-positive';
+            } else if (totalBalance < 0) {
+                balanceBadge.innerHTML = `${utilityIconMap.arrow_down} Queda`;
+                balanceBadge.className = 'percentage-tag is-negative';
+            } else {
+                balanceBadge.innerHTML = `= Zero`;
+                balanceBadge.className = 'percentage-tag is-neutral';
+            }
+        } else {
+            const diff = totalBalance - prevTotalBalance;
+            const percent = (diff / prevTotalBalance) * 100;
+
+            if (totalBalance > prevTotalBalance) {
+                balanceBadge.innerHTML = `${utilityIconMap.arrow_up} ${Math.abs(percent).toFixed(1)}%`;
+                balanceBadge.className = 'percentage-tag is-positive';
+            } else if (totalBalance < prevTotalBalance) {
+                balanceBadge.innerHTML = `${utilityIconMap.arrow_down} ${Math.abs(percent).toFixed(1)}%`;
+                balanceBadge.className = 'percentage-tag is-negative';
+            } else {
+                balanceBadge.innerHTML = `=`;
+                balanceBadge.className = 'percentage-tag is-neutral';
+            }
+        }
+    }
+}
+
+function updateStatementsSummary() {
+    const from = dateFilters.from;
+    const to = dateFilters.to;
+
+    const filteredTransactions = TransactionService.getAllTransactions().filter(
+        t => t.date >= from && t.date <= to
+    );
+
+    const totalIncome = filteredTransactions.filter(t => t.amount > 0).reduce((acc, t) => acc + t.amount, 0);
+    const totalOutcome = filteredTransactions.filter(t => t.amount < 0).reduce((acc, t) => acc + t.amount, 0);
+    const totalBalance = totalIncome + totalOutcome;
+    const totalTransactions = filteredTransactions.length;
+
+    const incomeValueElem = document.querySelector('.income-summary-stat .stat-value');
+    const outcomeValueElem = document.querySelector('.outcome-summary-stat .stat-value');
+    const balanceValueElem = document.querySelector('.balance-summary-stat .stat-value');
+    const countValueElem = document.querySelector('.transactions-summary-stat .stat-value');
+
+    const balanceStatContainer = document.querySelector('.balance-summary-stat');
+    if (balanceStatContainer) {
+        balanceStatContainer.classList.toggle('is-negative', totalBalance < 0);
+    }
+
+    if (incomeValueElem) incomeValueElem.textContent = `+${Utils.formatCurrency(totalIncome)}`;
+    if (outcomeValueElem) outcomeValueElem.textContent = Utils.formatCurrency(totalOutcome);
+    if (balanceValueElem) balanceValueElem.textContent = Utils.formatCurrency(totalBalance);
+    if (countValueElem) countValueElem.textContent = totalTransactions;
 }
 
 navLinks.forEach(link => {
@@ -500,8 +703,6 @@ function openTransactionModal(transaction = null) {
         title.textContent = 'Editar Transação';
         description.textContent = 'Atualize os dados abaixo para editar sua transação.';
         submitButton.textContent = 'Salvar alterações';
-
-        /* Lógica para preencher os campos do formulário com os dados da transação a ser editada */
     } else {
         title.textContent = 'Nova Transação';
         description.textContent = 'Preencha os dados abaixo para registrar sua transação.';
@@ -511,6 +712,21 @@ function openTransactionModal(transaction = null) {
 
     modalTransactionForm.classList.remove('hidden');
     document.body.classList.add('modal-open');
+}
+
+function fillTransactionForm(transaction) {
+    const form = document.getElementById('transaction-form');
+
+    form.querySelector('[name="description"]').value = transaction.description;
+    form.querySelector('[name="date"]').value = transaction.date;
+    form.querySelector('[name="categoryId"]').value = transaction.categoryId;
+
+    const typeValue = transaction.amount > 0 ? 'income' : 'outcome';
+    form.querySelector('[name="type"]').value = typeValue;
+
+    const rawAmount = Math.abs(transaction.amount);
+    const amountInput = document.getElementById('transaction-form-amount');
+    amountInput.value = Utils.formatCurrency(rawAmount);
 }
 
 function closeTransactionModal() {
@@ -550,12 +766,12 @@ modalTransactionForm.addEventListener('submit', (event) => {
         return;
     }
 
-    console.log("Dados do formulário:", cleanData);
-
     if (selectedTransactionId) {
-        // Lógica para editar a transação
+        TransactionService.updateTransaction(selectedTransactionId, cleanData);
+        updateViewContent(activeViewId);
+        transactionForm.reset();
     } else {
-        StorageService.addTransaction(cleanData);
+        TransactionService.addTransaction(cleanData);
         updateViewContent(activeViewId);
         transactionForm.reset();
     }
@@ -673,8 +889,40 @@ const btnEditTransaction = document.getElementById('btn-edit-transaction');
 
 function openTransactionDetailsModal(transactionId) {
     selectedTransactionId = transactionId;
-    /* Lógica para carregar os detalhes da transação usando o ID e exibir no modal */
-    console.log("Abrindo modal de detalhes da transação com ID:", transactionId)
+
+    const transaction = TransactionService.getTransactionById(transactionId);
+    if (!transaction) {
+        alert("Transação não encontrada.");
+        return;
+    }
+
+    const categoryData = Renderer.getCategoryData(transaction.categoryId);
+    const categoryIcon = categoryIconMap[categoryData.iconName] || categoryIconMap['default-icon'];
+
+    const iconContainer = modalTransactionDetails.querySelector('.category-icon-bg');
+    const categoryNameElem = modalTransactionDetails.querySelector('.transaction-category span');
+    const descriptionElem = modalTransactionDetails.querySelector('.transaction-details-description');
+    const amountElem = modalTransactionDetails.querySelector('.transaction-details-amount');
+    const dateElem = modalTransactionDetails.querySelector('.transaction-details-date');
+
+    const isNegative = transaction.amount < 0;
+
+    const [year, month, day] = transaction.date.split('-');
+    const dateFormatted = `${day}/${month}/${year}`;
+
+    if (iconContainer) iconContainer.innerHTML = categoryIcon;
+    if (categoryNameElem) categoryNameElem.textContent = categoryData.name;
+    if (descriptionElem) descriptionElem.textContent = transaction.description;
+
+    if (amountElem) {
+        amountElem.textContent = `${isNegative ? '' : '+'}${Utils.formatCurrency(transaction.amount)}`;
+        amountElem.classList.toggle('is-negative', isNegative);
+    }
+
+    if (dateElem) {
+        dateElem.textContent = dateFormatted;
+        dateElem.setAttribute('datetime', transaction.date);
+    }
 
     modalTransactionDetails.classList.remove('hidden');
     document.body.classList.add('modal-open');
@@ -706,12 +954,13 @@ modalTransactionDetails.addEventListener('click', (event) => {
 
 btnEditTransaction.addEventListener('click', () => {
     if (selectedTransactionId) {
-        console.log("Editando transação com ID:", selectedTransactionId);
-        const transaction = {
-            id: selectedTransactionId,
-        };/* Lógica para buscar os dados da transação usando o ID selecionado */
+        const transaction = TransactionService.getTransactionById(selectedTransactionId);
         closeTransactionDetailsModal();
-        openTransactionModal(transaction);
+        if (transaction) {
+            closeTransactionDetailsModal();
+            openTransactionModal(transaction);
+            fillTransactionForm(transaction);
+        }
     }
 });
 
@@ -721,8 +970,11 @@ btnDeleteTransaction.addEventListener('click', () => {
             "Excluir transação",
             "Você tem certeza que deseja remover esta transação?<br><br><strong>Essa ação não poderá ser desfeita</strong> e o valor será removido do seu saldo atual.",
             (idToDelete) => {
-                // Lógica para excluir a transação usando o ID
-                console.log("Confirmando exclusão do item com ID:", idToDelete);
+                TransactionService.deleteTransaction(idToDelete);
+                const activeView = document.querySelector('.app-view:not(.hidden)');
+                if (activeView) {
+                    updateViewContent(activeView.id);
+                }
             }
         );
     }
@@ -730,8 +982,8 @@ btnDeleteTransaction.addEventListener('click', () => {
 
 /* Script para controle do modal de confirmação de exclusão */
 
-const modalConfirmDelete = document.getElementById('modal-confirm');
-const btnConfirmCancel = document.getElementById('btn-confirm-cancel');
+const modalDelete = document.getElementById('modal-confirm');
+const btnCancelDelete = document.getElementById('btn-confirm-cancel');
 const btnConfirmDelete = document.getElementById('btn-confirm-delete');
 
 function openConfirmModal(idToDelete, title, description, confirmCallback) {
@@ -749,7 +1001,7 @@ function openConfirmModal(idToDelete, title, description, confirmCallback) {
         }
     }, { signal: abortController.signal, once: true });
 
-    modalConfirmDelete.classList.remove('hidden');
+    modalDelete.classList.remove('hidden');
     document.body.classList.add('modal-open');
 }
 
@@ -757,17 +1009,17 @@ function closeConfirmModal() {
     abortController.abort();
     abortController = new AbortController();
 
-    modalConfirmDelete.classList.add('hidden');
+    modalDelete.classList.add('hidden');
     if (modalTransactionDetails.classList.contains('hidden')) {
         document.body.classList.remove('modal-open');
     }
 }
 
-btnConfirmCancel.addEventListener('click', () => {
+btnCancelDelete.addEventListener('click', () => {
     closeConfirmModal();
 });
 
-modalConfirmDelete.addEventListener('click', (event) => {
+modalDelete.addEventListener('click', (event) => {
     if (event.target.id === 'modal-confirm') {
         closeConfirmModal();
     }
@@ -934,7 +1186,7 @@ itemsPerPageSelect.addEventListener('change', (event) => {
         itemsPerPageNumber = 10;
     }
     currentPagination.itemsPerPage = itemsPerPageNumber;
-    StorageService.setItemsPerPage(itemsPerPageNumber);
+    SettingsService.setItemsPerPage(itemsPerPageNumber);
     currentPagination.page = 1;
 
     updateViewContent('statements-view');

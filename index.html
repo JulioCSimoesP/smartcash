@@ -102,6 +102,7 @@
     <main id="app">
 
         <!-- TELA DE DASHBOARD -->
+
         <div id="dashboard-view" class="app-view hidden">
             <header class="view-header">
                 <div class="header-content">
@@ -122,7 +123,7 @@
             <section id="summary">
                 <div class="summary-wrapper">
                     <article class="summary-item card-incomes"
-                        aria-label="Resumo de entradas: 9.999,99 reais, um aumento de 12% em relação ao mês passado">
+                        aria-label="">
                         <div class="summary-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
                                 viewBox="0 0 256 256">
@@ -135,26 +136,19 @@
                         <div class="summary-info">
                             <div class="main-values">
                                 <span class="label">Entradas</span>
-                                <strong class="value">R$ 9.999,99</strong>
+                                <strong class="value"></strong>
                                 <span class="timeframe">Este mês</span>
                             </div>
 
                             <div class="comparison-badge">
-                                <span class="percentage-tag is-negative">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
-                                        viewBox="0 0 256 256">
-                                        <path
-                                            d="M205.66,149.66l-72,72a8,8,0,0,1-11.32,0l-72-72a8,8,0,0,1,11.32-11.32L120,196.69V40a8,8,0,0,1,16,0V196.69l58.34-58.35a8,8,0,0,1,11.32,11.32Z">
-                                        </path>
-                                    </svg> 12%
-                                </span>
+                                <span class="percentage-tag is-negative"></span>
                                 <span class="comparison-label">vs mês passado</span>
                             </div>
                         </div>
                     </article>
 
                     <article class="summary-item card-outcomes"
-                        aria-label="Resumo de saídas: 9.999,99 reais, um aumento de 12% em relação ao mês passado">
+                        aria-label="">
                         <div class="summary-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
                                 viewBox="0 0 256 256">
@@ -167,26 +161,19 @@
                         <div class="summary-info">
                             <div class="main-values">
                                 <span class="label">Saídas</span>
-                                <strong class="value">R$ 9.999,99</strong>
+                                <strong class="value"></strong>
                                 <span class="timeframe">Este mês</span>
                             </div>
 
                             <div class="comparison-badge">
-                                <span class="percentage-tag is-positive">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
-                                        viewBox="0 0 256 256">
-                                        <path
-                                            d="M205.66,117.66a8,8,0,0,1-11.32,0L136,59.31V216a8,8,0,0,1-16,0V59.31L61.66,117.66a8,8,0,0,1-11.32-11.32l72-72a8,8,0,0,1,11.32,0l72,72A8,8,0,0,1,205.66,117.66Z">
-                                        </path>
-                                    </svg> 12%
-                                </span>
+                                <span class="percentage-tag is-positive"></span>
                                 <span class="comparison-label">vs mês passado</span>
                             </div>
                         </div>
                     </article>
 
                     <article class="summary-item card-balance"
-                        aria-label="Saldo geral: 9.999,99 reais, um aumento de 12% em relação ao mês passado">
+                        aria-label="">
                         <div class="summary-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
                                 viewBox="0 0 256 256">
@@ -199,19 +186,12 @@
                         <div class="summary-info">
                             <div class="main-values">
                                 <span class="label">Saldo Geral</span>
-                                <strong class="value">R$ 9.999,99</strong>
+                                <strong class="value"></strong>
                                 <span class="timeframe">Este mês</span>
                             </div>
 
                             <div class="comparison-badge">
-                                <span class="percentage-tag is-positive">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
-                                        viewBox="0 0 256 256">
-                                        <path
-                                            d="M205.66,117.66a8,8,0,0,1-11.32,0L136,59.31V216a8,8,0,0,1-16,0V59.31L61.66,117.66a8,8,0,0,1-11.32-11.32l72-72a8,8,0,0,1,11.32,0l72,72A8,8,0,0,1,205.66,117.66Z">
-                                        </path>
-                                    </svg> 12%
-                                </span>
+                                <span class="percentage-tag is-positive"></span>
                                 <span class="comparison-label">vs mês passado</span>
                             </div>
                         </div>
@@ -222,7 +202,7 @@
             <section id="history">
                 <div class="history-wrapper">
                     <div class="history-header">
-                        <h2 id="history-title">Histórico</h2>
+                        <h2 id="history-title"></h2>
                         <button class="btn-secondary btn-redirect" id="btn-view-all" data-view="statements-view" aria-label="Ver todas as transações">
                             <div class="btn-secondary-wrapper">
                                 <span>Ver tudo</span>
@@ -242,7 +222,7 @@
                                 d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z">
                             </path>
                         </svg>
-                        <span>Exibindo as 10 últimas transações</span>
+                        <span id="history-info-tag">Exibindo as 10 últimas transações</span>
                     </div>
                     <ul class="history-list" id="dashboard-transaction-list"></ul>
                 </div>
@@ -317,7 +297,7 @@
                     <div class="summary-stat income-summary-stat">
                         <div class="stat-info">
                             <span class="stat-label">Entradas</span>
-                            <strong class="stat-value">R$ 9.999,99</strong>
+                            <strong class="stat-value"></strong>
                         </div>
                         <div class="stat-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
@@ -332,7 +312,7 @@
                     <div class="summary-stat outcome-summary-stat">
                         <div class="stat-info">
                             <span class="stat-label">Saídas</span>
-                            <strong class="stat-value">R$ 9.999,99</strong>
+                            <strong class="stat-value"></strong>
                         </div>
                         <div class="stat-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
@@ -347,7 +327,7 @@
                     <div class="summary-stat balance-summary-stat">
                         <div class=" stat-info">
                             <span class="stat-label">Saldo Geral</span>
-                            <strong class="stat-value">R$ 9.999,99</strong>
+                            <strong class="stat-value"></strong>
                         </div>
                         <div class="stat-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
@@ -362,7 +342,7 @@
                     <div class="summary-stat transactions-summary-stat">
                         <div class=" stat-info">
                             <span class="stat-label">Lançamentos</span>
-                            <strong class="stat-value">9999</strong>
+                            <strong class="stat-value"></strong>
                         </div>
                         <div class="stat-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
@@ -391,7 +371,7 @@
                             </select>
                         </div>
                     </div>
-                    <span class="current-shown-items">1-10 de 60 itens</span>
+                    <span class="current-shown-items"></span>
                     <div class="pagination-controls">
                         <button class="page-btn" aria-label="Página anterior" disabled>
                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
