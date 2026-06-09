@@ -37,7 +37,9 @@ const ModelService = {
 
     createCategory(data) {
         return {
-            id: crypto.randomUUID(),
+            id: Date.now().toString(36) + Math.random().toString(36).substring(2),
+            /* Comentado para testes em mobile. Descomentar após testes */
+            //id: crypto.randomUUID(),
             name: data.name,
             iconName: data.iconName || 'default-icon',
             type: data.type,
@@ -207,6 +209,47 @@ const TransactionService = {
     }
 };
 
+const CategoryService = {
+    _defaultCategoriesTemplate: [
+        { name: "Alimentação", iconName: "hamburguer", type: "outcome", isDefault: true },
+        { name: "Contas", iconName: "recibo", type: "outcome", isDefault: true },
+        { name: "Educação", iconName: "chapeu_graduacao", type: "outcome", isDefault: true },
+        { name: "Imposto", iconName: "balanca", type: "outcome", isDefault: true },
+        { name: "Investimentos", iconName: "investimento", type: "income", isDefault: true },
+        { name: "Lazer", iconName: "estrela", type: "outcome", isDefault: true },
+        { name: "Moradia", iconName: "casa", type: "outcome", isDefault: true },
+        { name: "Outros", iconName: "default-icon", type: "both", isDefault: true },
+        { name: "Salário", iconName: "cifrao", type: "income", isDefault: true },
+        { name: "Saúde", iconName: "pilula", type: "outcome", isDefault: true },
+        { name: "Transporte", iconName: "carro", type: "outcome", isDefault: true },
+        { name: "Transporte", iconName: "carro", type: "outcome", isDefault: false },
+    ],
+
+    _getRawCategories() {
+        return StorageService.get('categories') || [];
+    },
+
+    initCategories() {
+        const existingCategories = this._getRawCategories();
+
+        if (existingCategories.length === 0) {
+            const initialCategories = this._defaultCategoriesTemplate.map(cat =>
+                ModelService.createCategory(cat)
+            );
+            StorageService.save('categories', initialCategories);
+        }
+    },
+
+    getAllCategories() {
+        return this._getRawCategories();
+    },
+
+    getCategoryById(id) {
+        const categories = this._getRawCategories();
+        return categories.find(c => c.id === id) || { name: "Outros", iconName: "default-icon" };
+    }
+};
+
 const DateService = {
     getFirstDayOfMonth() {
         const now = new Date();
@@ -230,6 +273,45 @@ const DateService = {
 };
 
 const Renderer = {
+    _createCategoryCard(category) {
+        const icon = categoryIconMap[category.iconName] || categoryIconMap['default-icon'];
+
+        let badgeClass = 'badge-both';
+        let badgeText = 'Ambos';
+        if (category.type === 'income') { badgeClass = 'badge-income'; badgeText = 'Entrada'; }
+        if (category.type === 'outcome') { badgeClass = 'badge-outcome'; badgeText = 'Saída'; }
+
+        const li = document.createElement('li');
+        li.className = `category-card ${category.isDefault ? 'item-readonly' : ''}`;
+        if (!category.isDefault) {
+            li.dataset.id = category.id;
+        }
+
+        li.innerHTML = `
+                <div class="category-main-info">
+                    <div class="category-icon">${icon}</div>
+                    <span class="category-name">${category.name}</span>
+                    <span class="badge ${badgeClass}">${badgeText}</span>
+                </div>
+                <div class="category-actions">
+                    ${!category.isDefault ? `
+                        <button class="btn-action-edit" title="Editar categoria">
+                            ${utilityIconMap.edit}
+                        </button>
+                        <button class="btn-action-delete" title="Excluir categoria">
+                            ${utilityIconMap.delete}
+                        </button>
+                    ` : `
+                        ${utilityIconMap.lock}
+                    `}
+                </div>
+            `;
+
+        return li;
+    },
+
+
+
     renderTransactions(transactions, containerId) {
         const container = document.getElementById(containerId);
         container.innerHTML = '';
@@ -239,7 +321,7 @@ const Renderer = {
             emptyState.className = 'empty-state-card';
             emptyState.innerHTML = `
                 <div class="empty-state-content">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M80,224a8,8,0,0,1-8,8H56a16,16,0,0,1-16-16V184a8,8,0,0,1,16,0v32H72A8,8,0,0,1,80,224ZM216,88v48a8,8,0,0,1-16,0V96H152a8,8,0,0,1-8-8V40H120a8,8,0,0,1,0-16h32a8,8,0,0,1,5.66,2.34l56,56A8,8,0,0,1,216,88Zm-56-8h28.69L160,51.31ZM80,24H56A16,16,0,0,0,40,40V64a8,8,0,0,0,16,0V40H80a8,8,0,0,0,0-16ZM208,168a8,8,0,0,0-8,8v40h-8a8,8,0,0,0,0,16h8a16,16,0,0,0,16-16V176A8,8,0,0,0,208,168ZM48,152a8,8,0,0,0,8-8V104a8,8,0,0,0-16,0v40A8,8,0,0,0,48,152Zm104,64H112a8,8,0,0,0,0,16h40a8,8,0,0,0,0-16Z"></path></svg>
+                    ${utilityIconMap.empty_file}
                     <p>Não há transações registradas no período.</p>
                 </div>
             `;
@@ -248,7 +330,7 @@ const Renderer = {
         }
 
         transactions.forEach(t => {
-            const categoryData = this.getCategoryData(t.categoryId);
+            const categoryData = CategoryService.getCategoryById(t.categoryId);
             const categoryIcon = categoryIconMap[categoryData.iconName] || categoryIconMap['default-icon'];
 
             const card = document.createElement('li');
@@ -278,32 +360,66 @@ const Renderer = {
                     ${isNegative ? '' : '+'}${Utils.formatCurrency(t.amount)}
                 </span>
                 <div class="transaction-action">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000"
-                    viewBox="0 0 256 256">
-                        <path
-                        d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z">
-                        </path>
-                    </svg>
+                    ${utilityIconMap.caret_right}
                 </div>
             `;
             container.appendChild(card);
         });
     },
 
-    getCategoryData(categoryId) {
-        // Exemplo simulado de como os dados virão do Storage no futuro
-        const categories = [
-            { id: "1", name: "Moradia", iconName: "casa" },
-            { id: "2", name: "Alimentação", iconName: "hamburguer" }
-        ];
+    renderCategoryOptions(selectContainerId, currentType) {
+        const selectElem = document.getElementById(selectContainerId);
+        if (!selectElem) return;
 
-        const cat = categories.find(c => c.id === categoryId);
+        selectElem.innerHTML = '<option value="" disabled selected hidden>Selecione</option>';
 
-        return cat || { name: "Outros", iconName: "default-icon" };
+        if (!currentType) return;
+
+        const categories = CategoryService.getAllCategories();
+
+        const filteredCategories = categories.filter(category =>
+            category.type === currentType || category.type === 'both'
+        );
+
+        filteredCategories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category.id;
+            option.textContent = category.name;
+            selectElem.appendChild(option);
+        });
+    },
+
+    renderCategories() {
+        const defaultContainer = document.querySelector('#section-default-categories .category-list');
+        const userContainer = document.querySelector('#section-user-categories .category-list');
+
+        defaultContainer.innerHTML = '';
+        userContainer.innerHTML = '';
+
+        const allCategories = CategoryService.getAllCategories();
+
+        const defaultCategories = allCategories.filter(category => category.isDefault);
+        const userCategories = allCategories.filter(category => !category.isDefault);
+
+        defaultCategories.forEach(category => defaultContainer.appendChild(this._createCategoryCard(category)));
+
+        if (userCategories.length === 0) {
+            userContainer.innerHTML = `
+            <li class="empty-state-card">
+                <div class="empty-state-content">
+                    ${utilityIconMap.empty_folder}
+                    <p>Você ainda não criou nenhuma categoria personalizada.</p>
+                </div>
+            </li>
+        `;
+        } else {
+            userCategories.forEach(category => userContainer.appendChild(this._createCategoryCard(category)));
+        }
+
     }
 };
 
-/* Script de inicialização do app */
+/* App initialization */
 
 let abortController = new AbortController();
 let selectedTransactionId = null;
@@ -319,6 +435,7 @@ let dateFilters = {
 
 window.addEventListener('DOMContentLoaded', () => {
     const defaultViewId = 'dashboard-view';
+    CategoryService.initCategories();
     showView(defaultViewId);
 });
 
@@ -387,6 +504,12 @@ const categoryIconMap = {
 const utilityIconMap = {
     arrow_down: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"> <path d="M205.66,149.66l-72,72a8,8,0,0,1-11.32,0l-72-72a8,8,0,0,1,11.32-11.32L120,196.69V40a8,8,0,0,1,16,0V196.69l58.34-58.35a8,8,0,0,1,11.32,11.32Z"> </path> </svg>`,
     arrow_up: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"> <path d="M205.66,117.66a8,8,0,0,1-11.32,0L136,59.31V216a8,8,0,0,1-16,0V59.31L61.66,117.66a8,8,0,0,1-11.32-11.32l72-72a8,8,0,0,1,11.32,0l72,72A8,8,0,0,1,205.66,117.66Z"> </path> </svg>`,
+    edit: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"> <path d="M227.32,73.37,182.63,28.69a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H216a8,8,0,0,0,0-16H115.32l112-112A16,16,0,0,0,227.32,73.37ZM92.69,208H48V163.31l88-88L180.69,120ZM192,108.69,147.32,64l24-24L216,84.69Z"> </path> </svg>`,
+    delete: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"> <path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"> </path> </svg>`,
+    lock: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"> <path d="M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Z"> </path> </svg>`,
+    empty_file: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M80,224a8,8,0,0,1-8,8H56a16,16,0,0,1-16-16V184a8,8,0,0,1,16,0v32H72A8,8,0,0,1,80,224ZM216,88v48a8,8,0,0,1-16,0V96H152a8,8,0,0,1-8-8V40H120a8,8,0,0,1,0-16h32a8,8,0,0,1,5.66,2.34l56,56A8,8,0,0,1,216,88Zm-56-8h28.69L160,51.31ZM80,24H56A16,16,0,0,0,40,40V64a8,8,0,0,0,16,0V40H80a8,8,0,0,0,0-16ZM208,168a8,8,0,0,0-8,8v40h-8a8,8,0,0,0,0,16h8a16,16,0,0,0,16-16V176A8,8,0,0,0,208,168ZM48,152a8,8,0,0,0,8-8V104a8,8,0,0,0-16,0v40A8,8,0,0,0,48,152Zm104,64H112a8,8,0,0,0,0,16h40a8,8,0,0,0,0-16Z"></path></svg>`,
+    empty_folder: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M24,80V64A16,16,0,0,1,40,48H93.33a16.12,16.12,0,0,1,9.6,3.2L132.8,73.6a8,8,0,1,1-9.6,12.8L93.33,64H40V80a8,8,0,0,1-16,0ZM88,200H40v-8a8,8,0,0,0-16,0v8.62A15.4,15.4,0,0,0,39.38,216H88a8,8,0,0,0,0-16Zm72,0H128a8,8,0,0,0,0,16h32a8,8,0,0,0,0-16Zm64-56a8,8,0,0,0-8,8v48H200a8,8,0,0,0,0,16h16.89A15.13,15.13,0,0,0,232,200.89V152A8,8,0,0,0,224,144Zm-8-72H168a8,8,0,0,0,0,16h48v24a8,8,0,0,0,16,0V88A16,16,0,0,0,216,72ZM32,160a8,8,0,0,0,8-8V120a8,8,0,0,0-16,0v32A8,8,0,0,0,32,160Z"></path></svg>`,
+    caret_right: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path></svg>`,
 };
 
 /* Script para controle das views */
@@ -442,6 +565,8 @@ function updateViewContent(viewId) {
         updatePaginationSelect();
         updatePaginationButtons(data);
         updateStatementsSummary();
+    } else if (viewId === 'categories-view') {
+        Renderer.renderCategories();
     }
 }
 
@@ -697,17 +822,25 @@ function openTransactionModal(transaction = null) {
     const title = modalTransactionForm.querySelector('.transaction-form-title');
     const description = modalTransactionForm.querySelector('.transaction-form-description');
     const submitButton = modalTransactionForm.querySelector('button[type="submit"]');
+    const typeSelect = document.getElementById('transaction-form-type');
 
     if (transaction) {
         selectedTransactionId = transaction.id;
         title.textContent = 'Editar Transação';
         description.textContent = 'Atualize os dados abaixo para editar sua transação.';
         submitButton.textContent = 'Salvar alterações';
+
+        const typeValue = transaction.amount > 0 ? 'income' : 'outcome';
+        Renderer.renderCategoryOptions('transaction-form-category', typeValue);
+        fillTransactionForm(transaction);
     } else {
         title.textContent = 'Nova Transação';
         description.textContent = 'Preencha os dados abaixo para registrar sua transação.';
         submitButton.textContent = 'Registrar transação';
         transactionForm.reset();
+
+        typeSelect.value = 'outcome';
+        Renderer.renderCategoryOptions('transaction-form-category', typeSelect.value);
     }
 
     modalTransactionForm.classList.remove('hidden');
@@ -813,6 +946,11 @@ inputAmount.addEventListener('focus', (event) => {
     forceCursorToEnd(event.target)
 });
 
+document.getElementById('transaction-form-type').addEventListener('change', (event) => {
+    const selectedType = event.target.value;
+    Renderer.renderCategoryOptions('transaction-form-category', selectedType);
+});
+
 /* Script para controle do formulário de categorias */
 
 const modalCategoryForm = document.getElementById('modal-category-form');
@@ -896,7 +1034,7 @@ function openTransactionDetailsModal(transactionId) {
         return;
     }
 
-    const categoryData = Renderer.getCategoryData(transaction.categoryId);
+    const categoryData = CategoryService.getCategoryById(transaction.categoryId);
     const categoryIcon = categoryIconMap[categoryData.iconName] || categoryIconMap['default-icon'];
 
     const iconContainer = modalTransactionDetails.querySelector('.category-icon-bg');
@@ -959,7 +1097,6 @@ btnEditTransaction.addEventListener('click', () => {
         if (transaction) {
             closeTransactionDetailsModal();
             openTransactionModal(transaction);
-            fillTransactionForm(transaction);
         }
     }
 });

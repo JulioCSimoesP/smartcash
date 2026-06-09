@@ -1052,6 +1052,7 @@ body.modal-open {
 }
 
 .category-icon {
+    flex-shrink: 0;
     width: 40px;
     height: 40px;
     background-color: #EDF2F7;
@@ -1075,6 +1076,7 @@ body.modal-open {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    max-width: 150px;
 }
 
 .badge {
@@ -1118,6 +1120,7 @@ body.modal-open {
     align-items: center;
     gap: 0.25rem;
     flex-shrink: 0;
+    margin-left: 1rem;
 }
 
 .btn-action-edit,
@@ -2244,6 +2247,11 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     .category-card {
         flex: 0 0 calc(50% - (0.75rem / 2));
         margin: 0;
+    }
+
+    .category-list .empty-state-card {
+        flex: 0 0 100%;
+        max-width: 100%;
     }
 }
 
