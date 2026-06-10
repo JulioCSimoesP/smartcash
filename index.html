@@ -832,23 +832,23 @@
             <form id="category-form" class="modal-body">
                 <div class="input-group">
                     <label for="category-name">Nome</label>
-                    <input type="text" id="category-name" placeholder="Ex: Compras no mercado" required>
+                    <input type="text" id="category-name" name="name" autocomplete="off" placeholder="Ex: Mercado" maxlength="30" required>
                 </div>
 
                 <div class="input-row">
                     <div class="input-group">
                         <label for="category-type">Tipo</label>
-                        <select id="category-type" name="category-type" required>
+                        <select id="category-type" name="type" required>
                             <option value="" disabled selected hidden>Selecione</option>
                             <option value="income">Entrada</option>
                             <option value="outcome">Saída</option>
-                            <option value="both">Entrada e Saída</option>
+                            <option value="both">Ambos</option>
                         </select>
                     </div>
 
                     <div class="input-group">
                         <label for="category-icon">Ícone</label>
-                        <select id="category-icon" name="category-icon" required>
+                        <select id="category-icon" name="iconId" required>
                             <option value="" disabled selected hidden>Selecione</option>
                             <option value="house">Casa</option>
                             <option value="car">Carro</option>
