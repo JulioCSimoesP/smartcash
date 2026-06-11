@@ -25,9 +25,7 @@ const SettingsService = {
 const ModelService = {
     createTransaction(data) {
         return {
-            id: Date.now().toString(36) + Math.random().toString(36).substring(2),
-            /* Comentado para testes em mobile. Descomentar após testes */
-            //id: crypto.randomUUID(),
+            id: crypto.randomUUID(),
             description: data.description,
             amount: data.amount,
             date: data.date,
@@ -37,9 +35,7 @@ const ModelService = {
 
     createCategory(data) {
         return {
-            id: Date.now().toString(36) + Math.random().toString(36).substring(2),
-            /* Comentado para testes em mobile. Descomentar após testes */
-            //id: crypto.randomUUID(),
+            id: crypto.randomUUID(),
             name: data.name,
             iconId: data.iconId || 'default-icon',
             type: data.type,
