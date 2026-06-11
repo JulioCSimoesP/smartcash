@@ -180,7 +180,7 @@ const ValidationService = {
             errors.push("O nome da categoria deve ter pelo menos 3 caracteres.");
         }
 
-        if (data.name > MAX_NAME_LENGTH) {
+        if (data.name.length > MAX_NAME_LENGTH) {
             errors.push(`O nome da categoria não pode ter mais de ${MAX_NAME_LENGTH} caracteres.`);
         }
 
@@ -211,9 +211,14 @@ const TransactionService = {
         return transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
     },
 
+    getAllTransactionsInDateRange(from, to) {
+        const transactions = this.getAllTransactions();
+        return transactions.filter(transaction => transaction.date >= from && transaction.date <= to);
+    },
+
     getTransactionById(id) {
         const transactions = this._getRawTransactions();
-        return transactions.find(t => t.id === id);
+        return transactions.find(transaction => transaction.id === id);
     },
 
     addTransaction(transactionData) {
@@ -226,7 +231,7 @@ const TransactionService = {
 
     updateTransaction(id, updatedData) {
         const transactions = this._getRawTransactions();
-        const index = transactions.findIndex(t => t.id === id);
+        const index = transactions.findIndex(transaction => transaction.id === id);
         if (index !== -1) {
             transactions[index] = { id, ...updatedData };
             StorageService.save('transactions', transactions);
@@ -235,16 +240,15 @@ const TransactionService = {
 
     deleteTransaction(id) {
         let transactions = this._getRawTransactions();
-        transactions = transactions.filter(t => t.id !== id);
+        transactions = transactions.filter(transaction => transaction.id !== id);
         StorageService.save('transactions', transactions);
     },
 
     getFilteredAndPaginated(dateFilter = {}, pagination = {}) {
-        let list = this.getAllTransactions();
-        const from = dateFilter.dateFrom || DateService.getFirstDayOfMonth();
-        const to = dateFilter.dateTo || DateService.getToday();
+        const from = dateFilter.from || DateService.getFirstDayOfMonth();
+        const to = dateFilter.to || DateService.getToday();
 
-        list = list.filter(t => t.date >= from && t.date <= to);
+        const list = this.getAllTransactionsInDateRange(from, to);
 
         const page = pagination.page || 1;
         const itemsPerPage = pagination.itemsPerPage || 10;
@@ -272,7 +276,6 @@ const CategoryService = {
         { name: "Salário", iconId: "dollar_sign", type: "income", isDefault: true },
         { name: "Saúde", iconId: "pill", type: "outcome", isDefault: true },
         { name: "Transporte", iconId: "car", type: "outcome", isDefault: true },
-        { name: "Transporte", iconId: "car", type: "outcome", isDefault: false },
     ],
 
     _getRawCategories() {
@@ -308,12 +311,42 @@ const CategoryService = {
     },
 
     updateCategory(id, updatedData) {
+        const category = this.getCategoryById(id);
+
+        if (category.isDefault) {
+            alert("Categorias padrão não podem ser editadas.");
+            return;
+        }
+
         const categories = this._getRawCategories();
         const index = categories.findIndex(category => category.id === id);
         if (index !== -1) {
             categories[index] = { id, ...updatedData };
             StorageService.save('categories', categories);
         }
+    },
+
+    deleteCategory(id) {
+        const category = this.getCategoryById(id);
+
+        if (category.isDefault) {
+            alert("Não é possível excluir uma categoria padrão.");
+            return;
+        }
+
+        if (this.isCategoryInUse(id)) {
+            alert("Esta categoria já está sendo utilizada e não pode ser excluída.");
+            return;
+        }
+
+        let categories = this._getRawCategories();
+        categories = categories.filter(category => category.id !== id);
+        StorageService.save('categories', categories);
+    },
+
+    isCategoryInUse(categoryId) {
+        const transactions = TransactionService.getAllTransactions();
+        return transactions.some(transaction => transaction.categoryId === categoryId);
     },
 };
 
@@ -456,9 +489,11 @@ const Renderer = {
         });
     },
 
-    renderCategories() {
+    renderCategories(filterType = 'all') {
         const defaultContainer = document.querySelector('#section-default-categories .category-list');
         const userContainer = document.querySelector('#section-user-categories .category-list');
+        const sectionDefault = document.getElementById('section-default-categories');
+        const sectionUser = document.getElementById('section-user-categories');
 
         defaultContainer.innerHTML = '';
         userContainer.innerHTML = '';
@@ -468,10 +503,18 @@ const Renderer = {
         const defaultCategories = allCategories.filter(category => category.isDefault);
         const userCategories = allCategories.filter(category => !category.isDefault);
 
-        defaultCategories.forEach(category => defaultContainer.appendChild(this._createCategoryCard(category)));
+        if (filterType === 'all' || filterType === 'default') {
+            sectionDefault.classList.remove('hidden');
+            defaultCategories.forEach(category => defaultContainer.appendChild(this._createCategoryCard(category)));
+        } else {
+            sectionDefault.classList.add('hidden');
+        }
 
-        if (userCategories.length === 0) {
-            userContainer.innerHTML = `
+        if (filterType === 'all' || filterType === 'mine') {
+            sectionUser.classList.remove('hidden');
+
+            if (userCategories.length === 0) {
+                userContainer.innerHTML = `
             <li class="empty-state-card">
                 <div class="empty-state-content">
                     ${utilityIconMap.empty_folder}
@@ -479,10 +522,12 @@ const Renderer = {
                 </div>
             </li>
         `;
+            } else {
+                userCategories.forEach(category => userContainer.appendChild(this._createCategoryCard(category)));
+            }
         } else {
-            userCategories.forEach(category => userContainer.appendChild(this._createCategoryCard(category)));
+            sectionUser.classList.add('hidden');
         }
-
     },
 
     renderIconOptions(selectContainerId) {
@@ -500,6 +545,129 @@ const Renderer = {
     },
 };
 
+const ExportService = {
+    _getFilteredData() {
+        const from = dateFilters.from;
+        const to = dateFilters.to;
+        return TransactionService.getAllTransactionsInDateRange(from, to);
+    },
+
+    exportToCSV() {
+        const transactions = this._getFilteredData();
+        if (transactions.length === 0) {
+            alert("Não há dados no período para exportar.");
+            return;
+        }
+
+        let csvContent = "Data;Categoria;Descrição;Tipo;Valor\n";
+
+        transactions.forEach(transaction => {
+            const category = CategoryService.getCategoryById(transaction.categoryId);
+            const dateFormatted = transaction.date.split('-').reverse().join('/');
+            const typeText = transaction.amount < 0 ? "Saída" : "Entrada";
+            const valueFormatted = (transaction.amount / 100).toFixed(2).replace('.', ',');
+
+            csvContent += `"${dateFormatted}";"${category.name}";"${transaction.description}";"${typeText}";"${valueFormatted}"\n`;
+        });
+
+        const dateFrom = dateFilters.from.split('-').reverse().join('-');
+        const dateTo = dateFilters.to.split('-').reverse().join('-');
+
+        const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+        this._triggerDownload(blob, `smartcash_extrato_${dateFrom}_a_${dateTo}.csv`);
+    },
+
+    exportToPDF() {
+        const transactions = this._getFilteredData();
+        if (transactions.length === 0) {
+            alert("Não há dados no período para exportar.");
+            return;
+        }
+
+        const printWindow = window.open('', '_blank');
+        
+        let htmlContent = `
+            <!DOCTYPE html>
+            <html lang="pt-br">
+            <head>
+                <meta charset="UTF-8">
+                <title>SmartCash - Extrato Financeiro</title>
+                <style>
+                    body { font-family: 'Helvetica', 'Arial', sans-serif; color: #1E293B; padding: 20px; }
+                    h1 { color: #6366F1; margin-bottom: 5px; }
+                    p { margin-top: 0; color: #64748B; font-size: 14px; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                    th, td { text-align: left; padding: 12px; border-bottom: 1px solid #E2E8F0; }
+                    th { background-color: #F1F5F9; color: #334155; font-size: 14px; }
+                    td { font-size: 14px; }
+                    .is-positive { color: #10B981; font-weight: bold; }
+                    .is-negative { color: #EF4444; font-weight: bold; }
+                    @media print { button { display: none; } }
+                </style>
+            </head>
+            <body>
+                <h1>SmartCash</h1>
+                <p>Extrato de Movimentações: ${dateFilters.from.split('-').reverse().join('/')} até ${dateFilters.to.split('-').reverse().join('/')}</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Categoria</th>
+                            <th>Descrição</th>
+                            <th>Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        transactions.forEach(transaction => {
+            const category = CategoryService.getCategoryById(transaction.categoryId);
+            const dateFormatted = transaction.date.split('-').reverse().join('/');
+            const isNegative = transaction.amount < 0;
+            const valueFormatted = Utils.formatCurrency(Math.abs(transaction.amount));
+
+            htmlContent += `
+                <tr>
+                    <td>${dateFormatted}</td>
+                    <td>${category.name}</td>
+                    <td>${transaction.description}</td>
+                    <td class="${isNegative ? 'is-negative' : 'is-positive'}">${isNegative ? '-': '+'}${valueFormatted}</td>
+                </tr>
+            `;
+        });
+
+        htmlContent += `
+                    </tbody>
+                </table>
+                <script>
+                    window.onload = function() {
+                        window.print();
+                        setTimeout(function() { window.close(); }, 100);
+                    }
+                <\/script>
+            </body>
+            </html>
+        `;
+
+        printWindow.document.write(htmlContent);
+        printWindow.document.close();
+    },
+
+    _triggerDownload(blob, filename) {
+        const link = document.createElement("a");
+        if (link.download !== undefined) {
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+    }
+};
+
 /* App initialization */
 
 let abortController = new AbortController();
@@ -513,6 +681,7 @@ let dateFilters = {
     from: DateService.getFirstDayOfMonth(),
     to: DateService.getToday()
 };
+let currentCategoryFilter = 'all';
 
 window.addEventListener('DOMContentLoaded', () => {
     const defaultViewId = 'dashboard-view';
@@ -593,12 +762,17 @@ const utilityIconMap = {
     caret_right: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path></svg>`,
 };
 
-/* Script para controle das views */
+/* Views control */
 
 const views = document.querySelectorAll('.app-view');
 const navLinks = document.querySelectorAll('.nav-link, .menu-btn, .logo-link, .btn-redirect');
+const categoryFilterGroup = document.querySelectorAll('input[name="category-filter"]');
 
 function showView(viewId) {
+    if (viewId === 'categories-view') {
+        resetCategoriesFilter();
+    }
+
     views.forEach(view => view.classList.add('hidden'));
     document.getElementById(viewId).classList.remove('hidden');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -638,7 +812,7 @@ function updateViewContent(viewId) {
         document.getElementById('date-from').value = dateFilters.from;
         document.getElementById('date-to').value = dateFilters.to;
         const data = TransactionService.getFilteredAndPaginated(
-            { dateFrom: dateFilters.from, dateTo: dateFilters.to },
+            dateFilters,
             currentPagination
         );
         Renderer.renderTransactions(data.data, 'statements-transaction-list');
@@ -647,7 +821,7 @@ function updateViewContent(viewId) {
         updatePaginationButtons(data);
         updateStatementsSummary();
     } else if (viewId === 'categories-view') {
-        Renderer.renderCategories();
+        Renderer.renderCategories(currentCategoryFilter);
     }
 }
 
@@ -657,10 +831,8 @@ function updateDashboardSummary() {
     const currentMonthTo = DateService.getToday();
     const prevMonthRange = DateService.getPreviousMonthRange();
 
-    const allTransactions = TransactionService.getAllTransactions();
-
-    const currentMonthList = allTransactions.filter(t => t.date >= currentMonthFrom && t.date <= currentMonthTo);
-    const prevMonthList = allTransactions.filter(t => t.date >= prevMonthRange.from && t.date <= prevMonthRange.to);
+    const currentMonthList = TransactionService.getAllTransactionsInDateRange(currentMonthFrom, currentMonthTo);
+    const prevMonthList = TransactionService.getAllTransactionsInDateRange(prevMonthRange.from, prevMonthRange.to);
 
     const currentIncome = currentMonthList.filter(t => t.amount > 0).reduce((acc, t) => acc + t.amount, 0);
     const currentOutcome = currentMonthList.filter(t => t.amount < 0).reduce((acc, t) => acc + t.amount, 0);
@@ -784,9 +956,7 @@ function updateStatementsSummary() {
     const from = dateFilters.from;
     const to = dateFilters.to;
 
-    const filteredTransactions = TransactionService.getAllTransactions().filter(
-        t => t.date >= from && t.date <= to
-    );
+    const filteredTransactions = TransactionService.getAllTransactionsInDateRange(from, to);
 
     const totalIncome = filteredTransactions.filter(t => t.amount > 0).reduce((acc, t) => acc + t.amount, 0);
     const totalOutcome = filteredTransactions.filter(t => t.amount < 0).reduce((acc, t) => acc + t.amount, 0);
@@ -809,11 +979,26 @@ function updateStatementsSummary() {
     if (countValueElem) countValueElem.textContent = totalTransactions;
 }
 
+function resetCategoriesFilter() {
+    currentCategoryFilter = 'all';
+    const filterAll = document.getElementById('filter-all');
+    if (filterAll) {
+        filterAll.checked = true;
+    }
+}
+
 navLinks.forEach(link => {
     link.addEventListener('click', (event) => {
         event.preventDefault();
         const viewId = link.dataset.view;
         showView(viewId);
+    });
+});
+
+categoryFilterGroup.forEach(radio => {
+    radio.addEventListener('change', (event) => {
+        currentCategoryFilter = event.target.value;
+        Renderer.renderCategories(currentCategoryFilter);
     });
 });
 
@@ -1032,6 +1217,12 @@ document.getElementById('transaction-form-type').addEventListener('change', (eve
     Renderer.renderCategoryOptions('transaction-form-category', selectedType);
 });
 
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !modalTransactionForm.classList.contains('hidden')) {
+        closeTransactionModal();
+    }
+});
+
 /* Script para controle do formulário de categorias */
 
 const modalCategoryForm = document.getElementById('modal-category-form');
@@ -1052,7 +1243,7 @@ function openCategoryModal(category = null) {
         title.textContent = 'Editar Categoria';
         description.textContent = 'Atualize os dados abaixo para editar sua categoria.';
         submitButton.textContent = 'Salvar alterações';
-        
+
         Renderer.renderIconOptions('category-icon');
         fillCategoryForm(category);
     } else {
@@ -1060,7 +1251,7 @@ function openCategoryModal(category = null) {
         description.textContent = 'Preencha os dados abaixo para registrar sua categoria.';
         submitButton.textContent = 'Registrar Categoria';
         categoryForm.reset();
-        
+
         Renderer.renderIconOptions('category-icon');
     }
 
@@ -1123,6 +1314,12 @@ modalCategoryForm.addEventListener('submit', (event) => {
     }
 
     closeCategoryModal();
+});
+
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !modalCategoryForm.classList.contains('hidden')) {
+        closeCategoryModal();
+    }
 });
 
 /* Script para controle do modal de detalhes da transação */
@@ -1224,6 +1421,12 @@ btnDeleteTransaction.addEventListener('click', () => {
     }
 });
 
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !modalTransactionDetails.classList.contains('hidden')) {
+        closeTransactionDetailsModal();
+    }
+});
+
 /* Script para controle do modal de confirmação de exclusão */
 
 const modalDelete = document.getElementById('modal-confirm');
@@ -1269,6 +1472,12 @@ modalDelete.addEventListener('click', (event) => {
     }
 });
 
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !modalDelete.classList.contains('hidden')) {
+        closeConfirmModal();
+    }
+});
+
 /* Script para controle dos cards de categoria */
 
 document.body.addEventListener('click', (event) => {
@@ -1289,20 +1498,29 @@ document.body.addEventListener('click', (event) => {
     if (deleteBtn && document.getElementById('categories-view').classList.contains('hidden') === false) {
         const categoryCard = deleteBtn.closest('.category-card');
         const categoryId = categoryCard.dataset.id;
-        const categoryName = categoryCard.querySelector('.category-name').textContent;
+        const categoryName = CategoryService.getCategoryById(categoryId).name;
+
+        if (!categoryName) {
+            alert("Categoria não encontrada.");
+            return;
+        }
 
         openConfirmModal(
             categoryId,
             'Excluir categoria',
             `Tem certeza que deseja excluir a categoria <strong>${categoryName}</strong>?<br><br>Categorias já utilizadas não podem ser excluídas.`,
-            (id) => {
-                console.log("Deletando categoria:", id);
+            (idToDelete) => {
+                CategoryService.deleteCategory(idToDelete);
+                const activeView = document.querySelector('.app-view:not(.hidden)');
+                if (activeView) {
+                    updateViewContent(activeView.id);
+                }
             }
         );
     }
 });
 
-/* Script para controle do botão de exportação de extrato */
+/* Statements Export */
 
 const btnExportAction = document.getElementById('btn-export-action');
 const btnExportToggle = document.getElementById('btn-export-toggle');
@@ -1317,8 +1535,13 @@ function closeExportMenu() {
 }
 
 function exportData(format) {
-    console.log("Exportando dados no formato:", format);
-    /* Lógica para exportar os dados no formato selecionado */
+    if (format === 'csv') {
+        ExportService.exportToCSV();
+    } else if (format === 'pdf') {
+        ExportService.exportToPDF();
+    } else {
+        alert("Formato de exportação inválido.");
+    }
 }
 
 btnExportToggle.addEventListener('click', () => {
@@ -1336,6 +1559,21 @@ exportMenuOptions.addEventListener('click', (event) => {
 btnExportAction.addEventListener('click', () => {
     const format = btnExportToggle.dataset.format;
     exportData(format);
+});
+
+document.addEventListener('click', (event) => {
+    const isClickInsideExport = btnExportToggle.contains(event.target) || 
+                               exportMenuOptions.contains(event.target);
+    
+    if (!isClickInsideExport && !exportMenuOptions.classList.contains('hidden')) {
+        closeExportMenu();
+    }
+});
+
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !exportMenuOptions.classList.contains('hidden')) {
+        closeExportMenu();
+    }
 });
 
 /* Script para controle do botão de voltar ao topo */
@@ -1442,7 +1680,7 @@ btnPrevPage.addEventListener('click', () => {
 });
 
 btnNextPage.addEventListener('click', () => {
-    const data = TransactionService.getFilteredAndPaginated({}, currentPagination);
+    const data = TransactionService.getFilteredAndPaginated(dateFilters, currentPagination);
     if (currentPagination.page < data.totalPages) {
         currentPagination.page++;
         updateViewContent('statements-view');
@@ -1462,7 +1700,6 @@ inputDateFrom.addEventListener('change', (event) => {
     updateViewContent('statements-view');
 });
 
-// Escuta mudança na data final
 inputDateTo.addEventListener('change', (event) => {
     const dateFrom = inputDateFrom.value;
     dateFilters.to = event.target.value;
