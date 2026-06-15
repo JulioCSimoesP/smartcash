@@ -69,6 +69,9 @@ const Utils = {
         return date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
     },
 
+    normalizeString: (str) => {
+        return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    },
 };
 
 const IconHelper = {
@@ -555,16 +558,20 @@ const ExportService = {
             return;
         }
 
-        let csvContent = "Data;Categoria;Descrição;Tipo;Valor\n";
+        let csvContent = "sep=,\n";
+        csvContent += "Data,Categoria,Descrição,Tipo,Valor\n";
 
         transactions.forEach(transaction => {
             const category = CategoryService.getCategoryById(transaction.categoryId);
             const dateFormatted = transaction.date.split('-').reverse().join('/');
             const typeText = transaction.amount < 0 ? "Saída" : "Entrada";
-            const valueFormatted = (transaction.amount / 100).toFixed(2).replace('.', ',');
+            const description = transaction.description.replace(/"/g, '""');
+            const valueFormatted = (transaction.amount / 100).toFixed(2);
 
-            csvContent += `"${dateFormatted}";"${category.name}";"${transaction.description}";"${typeText}";"${valueFormatted}"\n`;
+            csvContent += `"${dateFormatted}","${category.name}","${description}","${typeText}","${valueFormatted}"\n`;
         });
+
+        csvContent = Utils.normalizeString(csvContent);
 
         const dateFrom = dateFilters.from.split('-').reverse().join('-');
         const dateTo = dateFilters.to.split('-').reverse().join('-');
@@ -580,8 +587,13 @@ const ExportService = {
             return;
         }
 
-        const printWindow = window.open('', '_blank');
-        
+        const iframe = document.createElement('iframe');
+        iframe.style.position = 'absolute';
+        iframe.style.width = '0';
+        iframe.style.height = '0';
+        iframe.style.border = 'none';
+        document.body.appendChild(iframe);
+
         let htmlContent = `
             <!DOCTYPE html>
             <html lang="pt-br">
@@ -627,7 +639,7 @@ const ExportService = {
                     <td>${dateFormatted}</td>
                     <td>${category.name}</td>
                     <td>${transaction.description}</td>
-                    <td class="${isNegative ? 'is-negative' : 'is-positive'}">${isNegative ? '-': '+'}${valueFormatted}</td>
+                    <td class="${isNegative ? 'is-negative' : 'is-positive'}">${isNegative ? '-' : '+'}${valueFormatted}</td>
                 </tr>
             `;
         });
@@ -635,18 +647,23 @@ const ExportService = {
         htmlContent += `
                     </tbody>
                 </table>
-                <script>
-                    window.onload = function() {
-                        window.print();
-                        setTimeout(function() { window.close(); }, 100);
-                    }
-                <\/script>
             </body>
             </html>
         `;
 
-        printWindow.document.write(htmlContent);
-        printWindow.document.close();
+        const iframeDoc = iframe.contentWindow.document;
+        iframeDoc.open();
+        iframeDoc.write(htmlContent);
+        iframeDoc.close();
+
+        setTimeout(() => {
+            iframe.contentWindow.focus();
+            iframe.contentWindow.print();
+
+            setTimeout(() => {
+                document.body.removeChild(iframe);
+            }, 2000);
+        }, 500);
     },
 
     _triggerDownload(blob, filename) {
@@ -1558,9 +1575,9 @@ btnExportAction.addEventListener('click', () => {
 });
 
 document.addEventListener('click', (event) => {
-    const isClickInsideExport = btnExportToggle.contains(event.target) || 
-                               exportMenuOptions.contains(event.target);
-    
+    const isClickInsideExport = btnExportToggle.contains(event.target) ||
+        exportMenuOptions.contains(event.target);
+
     if (!isClickInsideExport && !exportMenuOptions.classList.contains('hidden')) {
         closeExportMenu();
     }
