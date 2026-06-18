@@ -72,6 +72,49 @@ const Utils = {
     normalizeString: (str) => {
         return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     },
+
+    animateNumber: (element, start, target, duration, formatter) => {
+        let startTimestamp = null;
+        
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const elapsed = timestamp - startTimestamp;
+            const progress = Math.min(elapsed / duration, 1);
+            const ease = 1 - Math.pow(1 - progress, 3);
+            
+            const current = Math.floor(start + (target - start) * ease);
+            
+            element.textContent = formatter(current);
+
+            if (progress < 1) window.requestAnimationFrame(step);
+        };
+        window.requestAnimationFrame(step);
+    },
+
+    animateCurrency: (element, targetCents, duration = 800, prefix = '') => {
+        const startCents = parseInt(element.dataset.currentCents, 10) || 0;
+        
+        if (startCents === targetCents) {
+            element.textContent = prefix + Utils.formatCurrency(targetCents);
+            return;
+        }
+
+        element.dataset.currentCents = targetCents;
+
+        Utils.animateNumber(element, startCents, targetCents, duration, (val) => prefix + Utils.formatCurrency(val));
+    },
+
+    animateCount: (element, targetValue, duration = 800) => {
+        const startValue = parseInt(element.dataset.currentValue, 10) || 0;
+        if (startValue === targetValue) {
+            element.textContent = targetValue;
+            return;
+        }
+
+        element.dataset.currentValue = targetValue;
+
+        Utils.animateNumber(element, startValue, targetValue, duration, (val) => val);
+    },
 };
 
 const IconHelper = {
@@ -428,7 +471,7 @@ const Renderer = {
             return;
         }
 
-        transactions.forEach(t => {
+        transactions.forEach((t, index) => {
             const categoryData = CategoryService.getCategoryById(t.categoryId);
             const categoryIcon = IconHelper.getIconById(categoryData.iconId);
 
@@ -439,6 +482,9 @@ const Renderer = {
             card.setAttribute('tabindex', '0');
             /* Colocar descrição do card para aria-label */
             card.setAttribute('aria-label', ``);
+
+            card.style.animationDelay = `${index * 0.04}s`;
+            card.style.opacity = '0';
 
             const isNegative = t.amount < 0;
 
@@ -791,7 +837,7 @@ function showView(viewId) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     updateStickyButtonsVisibility();
     updateNavLinksActiveState(viewId);
-    updateViewContent(viewId);
+    updateViewContent(viewId, true);
     closeModalMenu();
     closeTransactionModal();
     closeCategoryModal();
@@ -806,7 +852,7 @@ function updateNavLinksActiveState(viewId) {
     });
 }
 
-function updateViewContent(viewId) {
+function updateViewContent(viewId, isViewSwitch = false) {
     if (viewId === 'dashboard-view') {
         const data = TransactionService.getFilteredAndPaginated({}, { page: 1, itemsPerPage: 10 });
         Renderer.renderTransactions(data.data, 'dashboard-transaction-list');
@@ -819,7 +865,7 @@ function updateViewContent(viewId) {
         titleElement.textContent = `Histórico - ${formattedTitle}`;
         infoTag.textContent = `Exibindo as 10 últimas transações do mês de ${formattedTitle}`;
 
-        updateDashboardSummary();
+        updateDashboardSummary(isViewSwitch);
     }
     else if (viewId === 'statements-view') {
         document.getElementById('date-from').value = dateFilters.from;
@@ -832,13 +878,13 @@ function updateViewContent(viewId) {
         updatePaginationInfo(data);
         updatePaginationSelect();
         updatePaginationButtons(data);
-        updateStatementsSummary();
+        updateStatementsSummary(isViewSwitch);
     } else if (viewId === 'categories-view') {
         Renderer.renderCategories(currentCategoryFilter);
     }
 }
 
-function updateDashboardSummary() {
+function updateDashboardSummary(forceReset = false) {
     const now = new Date();
     const currentMonthFrom = DateService.getFirstDayOfMonth();
     const currentMonthTo = DateService.getToday();
@@ -863,9 +909,24 @@ function updateDashboardSummary() {
     const outcomeBadge = document.querySelector('.card-outcomes .percentage-tag');
     const balanceBadge = document.querySelector('.card-balance .percentage-tag');
 
-    if (incomeValueElem) incomeValueElem.textContent = `+${Utils.formatCurrency(currentIncome)}`;
-    if (outcomeValueElem) outcomeValueElem.textContent = `-${Utils.formatCurrency(Math.abs(currentOutcome))}`;
-    if (balanceValueElem) balanceValueElem.textContent = Utils.formatCurrency(totalBalance);
+    if (forceReset) {
+        if (incomeValueElem) delete incomeValueElem.dataset.currentCents;
+        if (outcomeValueElem) delete outcomeValueElem.dataset.currentCents;
+        if (balanceValueElem) delete balanceValueElem.dataset.currentCents;
+    }
+
+    if (incomeValueElem) {
+        Utils.animateCurrency(incomeValueElem, currentIncome, 800, '+');
+    }
+    
+    if (outcomeValueElem) {
+        Utils.animateCurrency(outcomeValueElem, Math.abs(currentOutcome), 800, '-');
+    }
+    
+    if (balanceValueElem) {
+        Utils.animateCurrency(balanceValueElem, totalBalance, 800, '');
+    }
+    
     if (balanceCard) balanceCard.classList.toggle('is-negative', totalBalance < 0);
 
     if (incomeBadge) {
@@ -965,7 +1026,7 @@ function updateDashboardSummary() {
     }
 }
 
-function updateStatementsSummary() {
+function updateStatementsSummary(forceReset = false) {
     const from = dateFilters.from;
     const to = dateFilters.to;
 
@@ -986,10 +1047,17 @@ function updateStatementsSummary() {
         balanceStatContainer.classList.toggle('is-negative', totalBalance < 0);
     }
 
-    if (incomeValueElem) incomeValueElem.textContent = `+${Utils.formatCurrency(totalIncome)}`;
-    if (outcomeValueElem) outcomeValueElem.textContent = `-${Utils.formatCurrency(Math.abs(totalOutcome))}`;
-    if (balanceValueElem) balanceValueElem.textContent = Utils.formatCurrency(totalBalance);
-    if (countValueElem) countValueElem.textContent = totalTransactions;
+    if (forceReset) {
+        if (incomeValueElem) delete incomeValueElem.dataset.currentCents;
+        if (outcomeValueElem) delete outcomeValueElem.dataset.currentCents;
+        if (balanceValueElem) delete balanceValueElem.dataset.currentCents;
+        if (countValueElem) delete countValueElem.dataset.currentValue;
+    }
+
+    if (incomeValueElem) Utils.animateCurrency(incomeValueElem, totalIncome, 800, '+');
+    if (outcomeValueElem) Utils.animateCurrency(outcomeValueElem, Math.abs(totalOutcome), 800, '-');
+    if (balanceValueElem) Utils.animateCurrency(balanceValueElem, totalBalance, 800, '');
+    if (countValueElem) Utils.animateCount(countValueElem, totalTransactions, 800);
 }
 
 function resetCategoriesFilter() {
