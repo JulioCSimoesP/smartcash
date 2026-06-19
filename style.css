@@ -1855,6 +1855,11 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     transform: scale(0.9);
 }
 
+.btn-back-to-top {
+    opacity: 0;
+    visibility: hidden;
+}
+
 .toast-container {
     position: fixed;
     top: 1.5rem;
