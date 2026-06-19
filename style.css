@@ -707,7 +707,6 @@ body.modal-open {
     padding: 0.75rem;
     gap: 0.5rem;
     border-left: 1px solid #E2E8F0;
-    /* A linha divisória */
     min-width: 120px;
     color: var(--text-highlight);
     transition: background-color 0.2s ease;
