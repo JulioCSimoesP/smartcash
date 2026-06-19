@@ -1856,6 +1856,93 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     transform: scale(0.9);
 }
 
+.toast-container {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.25rem;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    pointer-events: none;
+}
+
+.toast {
+    background-color: var(--secondary-bg);
+    border-left: 4px solid var(--outcome-color);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    width: 320px;
+    max-width: calc(100vw - 2.5rem);
+    pointer-events: auto;
+    animation: slideInToast 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    will-change: transform, opacity;
+}
+
+.toast.is-hiding {
+    animation: fadeOutToast 0.3s ease forwards;
+}
+
+.toast-icon {
+    color: var(--outcome-color);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+
+.toast-icon svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+}
+
+.toast-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+}
+
+.toast-title {
+    font-family: var(--font-primary);
+    font-weight: 800;
+    font-size: 1rem;
+    color: var(--primary-text);
+}
+
+.toast-message {
+    font-family: var(--font-secondary);
+    font-size: 0.875rem;
+    color: var(--secondary-text);
+    line-height: 1.5;
+}
+
+@keyframes slideInToast {
+    from { 
+        opacity: 0; 
+        transform: translateX(100%); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateX(0); 
+    }
+}
+
+@keyframes fadeOutToast {
+    from { 
+        opacity: 1; 
+        transform: scale(1); 
+    }
+    to { 
+        opacity: 0; 
+        transform: scale(0.9); 
+    }
+}
+
 /* Breakpoints */
 
 @media (min-width: 768px) {
@@ -2304,15 +2391,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         font-size: 0.9375rem;
     }
 
-    .input-group label {
-        font-size: 0.9375rem;
-    }
-
     .input-group input[type="text"],
-    .input-group input[type="date"] {
-        font-size: 0.9375rem;
-    }
-
+    .input-group input[type="date"],
+    .input-group label,
     .input-group select {
         font-size: 0.9375rem;
     }
@@ -2724,15 +2805,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         font-size: 1rem;
     }
 
-    .input-group label {
-        font-size: 1rem;
-    }
-
     .input-group input[type="text"],
-    .input-group input[type="date"] {
-        font-size: 1rem;
-    }
-
+    .input-group input[type="date"],
+    .input-group label,
     .input-group select {
         font-size: 1rem;
     }

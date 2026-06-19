@@ -47,7 +47,7 @@
     <script src="script.js?v1.0.0" defer></script>
 </head>
 
-<body class="">
+<body>
     <header class="main-header">
         <div class="header-wrapper">
             <a href="#dashboard" data-view="dashboard-view" class="logo-link">
@@ -584,7 +584,7 @@
                     <select id="transaction-form-category" name="categoryId" required></select>
                 </div>
 
-                <button type="submit" class="btn-primary"></button>
+                <button type="submit" class="btn-primary">Registrar transação</button>
             </form>
 
         </div>
@@ -679,7 +679,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn-primary"></button>
+                <button type="submit" class="btn-primary">Registrar categoria</button>
             </form>
 
         </div>
@@ -737,6 +737,9 @@
             </path>
         </svg>
     </a>
+
+    <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+    
 </body>
 
 </html>

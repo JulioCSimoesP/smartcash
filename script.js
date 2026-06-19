@@ -55,7 +55,9 @@ const Utils = {
     },
 
     parseCurrency: (value) => {
-        const outputValue = parseInt(value.replace(/\D/g, ''), 10);
+        if (!value) return 0;
+
+        const outputValue = parseInt(value.toString().replace(/\D/g, ''), 10);
 
         if (isNaN(outputValue)) {
             return 0;
@@ -731,7 +733,37 @@ const ExportService = {
 const ExceptionService = {
     handle(error) {
         console.error("[SmartCash Error]:", error);
-        alert(error.message || "Ocorreu um erro inesperado no sistema.");
+        this.showToast("Ops! Algo deu errado:", error.message || "Ocorreu um erro inesperado no sistema.");
+    },
+
+    showToast(title, message, duration = 5000) {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        
+        toast.innerHTML = `
+            <div class="toast-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+                    <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm-8-80V80a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm20,36a12,12,0,1,1-12-12A12,12,0,0,1,140,172Z"></path>
+                </svg>
+            </div>
+            <div class="toast-content">
+                <span class="toast-title">${title}</span>
+                <span class="toast-message">${message.replace(/\n/g, '<br><br>')}</span>
+            </div>
+        `;
+
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.add('is-hiding');
+            
+            toast.addEventListener('animationend', () => {
+                toast.remove();
+            });
+        }, duration);
     }
 };
 
@@ -1251,7 +1283,7 @@ transactionForm.addEventListener('submit', (event) => {
         const activeViewId = activeView ? activeView.id : null;
 
         if (!validationResult.isValid) {
-            throw new Error("Erros de validação:\n\n" + validationResult.errors.join("\n"));
+            throw new Error(validationResult.errors.join("\n"));
         }
 
         if (selectedTransactionId) {
