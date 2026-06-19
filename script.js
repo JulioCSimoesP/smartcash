@@ -75,15 +75,15 @@ const Utils = {
 
     animateNumber: (element, start, target, duration, formatter) => {
         let startTimestamp = null;
-        
+
         const step = (timestamp) => {
             if (!startTimestamp) startTimestamp = timestamp;
             const elapsed = timestamp - startTimestamp;
             const progress = Math.min(elapsed / duration, 1);
             const ease = 1 - Math.pow(1 - progress, 3);
-            
+
             const current = Math.floor(start + (target - start) * ease);
-            
+
             element.textContent = formatter(current);
 
             if (progress < 1) window.requestAnimationFrame(step);
@@ -93,7 +93,7 @@ const Utils = {
 
     animateCurrency: (element, targetCents, duration = 800, prefix = '') => {
         const startCents = parseInt(element.dataset.currentCents, 10) || 0;
-        
+
         if (startCents === targetCents) {
             element.textContent = prefix + Utils.formatCurrency(targetCents);
             return;
@@ -254,8 +254,9 @@ const TransactionService = {
     },
 
     getAllTransactionsInDateRange(from, to) {
-        const transactions = this.getAllTransactions();
-        return transactions.filter(transaction => transaction.date >= from && transaction.date <= to);
+        const transactions = this._getRawTransactions();
+        const filtered = transactions.filter(transaction => transaction.date >= from && transaction.date <= to);
+        return filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
     },
 
     getTransactionById(id) {
@@ -302,7 +303,12 @@ const TransactionService = {
             totalItems: list.length,
             totalPages: Math.ceil(list.length / itemsPerPage)
         };
-    }
+    },
+
+    getTotalPagesFiltered(from, to, itemsPerPage) {
+        const totalItems = this.getAllTransactionsInDateRange(from, to).length;
+        return Math.ceil(totalItems / itemsPerPage);
+    },
 };
 
 const CategoryService = {
@@ -356,8 +362,7 @@ const CategoryService = {
         const category = this.getCategoryById(id);
 
         if (category.isDefault) {
-            alert("Categorias padrão não podem ser editadas.");
-            return;
+            throw new Error("Categorias padrão não podem ser editadas.");
         }
 
         const categories = this._getRawCategories();
@@ -372,13 +377,11 @@ const CategoryService = {
         const category = this.getCategoryById(id);
 
         if (category.isDefault) {
-            alert("Não é possível excluir uma categoria padrão.");
-            return;
+            throw new Error("Não é possível excluir uma categoria padrão.");
         }
 
         if (this.isCategoryInUse(id)) {
-            alert("Esta categoria já está sendo utilizada e não pode ser excluída.");
-            return;
+            throw new Error("Esta categoria já está sendo utilizada em transações e não pode ser excluída.");
         }
 
         let categories = this._getRawCategories();
@@ -600,8 +603,7 @@ const ExportService = {
     exportToCSV() {
         const transactions = this._getFilteredData();
         if (transactions.length === 0) {
-            alert("Não há dados no período para exportar.");
-            return;
+            throw new Error("Não há dados no período para exportar para CSV.");
         }
 
         let csvContent = "sep=,\n";
@@ -629,8 +631,7 @@ const ExportService = {
     exportToPDF() {
         const transactions = this._getFilteredData();
         if (transactions.length === 0) {
-            alert("Não há dados no período para exportar.");
-            return;
+            throw new Error("Não há dados no período para exportar para PDF.");
         }
 
         const iframe = document.createElement('iframe');
@@ -724,6 +725,13 @@ const ExportService = {
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
         }
+    }
+};
+
+const ExceptionService = {
+    handle(error) {
+        console.error("[SmartCash Error]:", error);
+        alert(error.message || "Ocorreu um erro inesperado no sistema.");
     }
 };
 
@@ -918,15 +926,15 @@ function updateDashboardSummary(forceReset = false) {
     if (incomeValueElem) {
         Utils.animateCurrency(incomeValueElem, currentIncome, 800, '+');
     }
-    
+
     if (outcomeValueElem) {
         Utils.animateCurrency(outcomeValueElem, Math.abs(currentOutcome), 800, '-');
     }
-    
+
     if (balanceValueElem) {
         Utils.animateCurrency(balanceValueElem, totalBalance, 800, '');
     }
-    
+
     if (balanceCard) balanceCard.classList.toggle('is-negative', totalBalance < 0);
 
     if (incomeBadge) {
@@ -1231,32 +1239,33 @@ modalTransactionForm.addEventListener('click', (event) => {
     }
 });
 
-modalTransactionForm.addEventListener('submit', (event) => {
+transactionForm.addEventListener('submit', (event) => {
     event.preventDefault();
 
-    const formData = new FormData(transactionForm);
-    const rawData = Object.fromEntries(formData.entries());
-    const cleanData = SanitizationService.cleanTransaction(rawData);
-    const validationResult = ValidationService.validateTransaction(cleanData);
-    const activeView = document.querySelector('.app-view:not(.hidden)');
-    const activeViewId = activeView ? activeView.id : null;
+    try {
+        const formData = new FormData(transactionForm);
+        const rawData = Object.fromEntries(formData.entries());
+        const cleanData = SanitizationService.cleanTransaction(rawData);
+        const validationResult = ValidationService.validateTransaction(cleanData);
+        const activeView = document.querySelector('.app-view:not(.hidden)');
+        const activeViewId = activeView ? activeView.id : null;
 
-    if (!validationResult.isValid) {
-        alert("Por favor, corrija os seguintes erros:\n\n" + validationResult.errors.join("\n"));
-        return;
-    }
+        if (!validationResult.isValid) {
+            throw new Error("Erros de validação:\n\n" + validationResult.errors.join("\n"));
+        }
 
-    if (selectedTransactionId) {
-        TransactionService.updateTransaction(selectedTransactionId, cleanData);
+        if (selectedTransactionId) {
+            TransactionService.updateTransaction(selectedTransactionId, cleanData);
+        } else {
+            TransactionService.addTransaction(cleanData);
+        }
+
         updateViewContent(activeViewId);
         transactionForm.reset();
-    } else {
-        TransactionService.addTransaction(cleanData);
-        updateViewContent(activeViewId);
-        transactionForm.reset();
+        closeTransactionModal();
+    } catch (error) {
+        ExceptionService.handle(error);
     }
-
-    closeTransactionModal();
 });
 
 inputAmount.addEventListener('input', (event) => {
@@ -1368,33 +1377,34 @@ modalCategoryForm.addEventListener('click', (event) => {
     }
 });
 
-modalCategoryForm.addEventListener('submit', (event) => {
+categoryForm.addEventListener('submit', (event) => {
     event.preventDefault();
 
-    const form = event.target;
-    const formData = new FormData(form);
-    const rawData = Object.fromEntries(formData.entries());
-    const cleanData = SanitizationService.cleanCategory(rawData);
-    const validationResult = ValidationService.validateCategory(cleanData);
-    const activeView = document.querySelector('.app-view:not(.hidden)');
-    const activeViewId = activeView ? activeView.id : null;
+    try {
+        const form = event.target;
+        const formData = new FormData(form);
+        const rawData = Object.fromEntries(formData.entries());
+        const cleanData = SanitizationService.cleanCategory(rawData);
+        const validationResult = ValidationService.validateCategory(cleanData);
+        const activeView = document.querySelector('.app-view:not(.hidden)');
+        const activeViewId = activeView ? activeView.id : null;
 
-    if (!validationResult.isValid) {
-        alert("Por favor, corrija os seguintes erros:\n\n" + validationResult.errors.join("\n"));
-        return;
-    }
+        if (!validationResult.isValid) {
+            throw new Error("Erros de validação:\n\n" + validationResult.errors.join("\n"));
+        }
 
-    if (selectedCategoryId) {
-        CategoryService.updateCategory(selectedCategoryId, cleanData);
+        if (selectedCategoryId) {
+            CategoryService.updateCategory(selectedCategoryId, cleanData);
+        } else {
+            CategoryService.addCategory(cleanData);
+        }
+
         updateViewContent(activeViewId);
         form.reset();
-    } else {
-        CategoryService.addCategory(cleanData);
-        updateViewContent(activeViewId);
-        form.reset();
+        closeCategoryModal();
+    } catch (error) {
+        ExceptionService.handle(error);
     }
-
-    closeCategoryModal();
 });
 
 document.addEventListener('keydown', (event) => {
@@ -1415,8 +1425,7 @@ function openTransactionDetailsModal(transactionId) {
 
     const transaction = TransactionService.getTransactionById(transactionId);
     if (!transaction) {
-        alert("Transação não encontrada.");
-        return;
+        throw new Error("Transação não encontrada.");
     }
 
     const categoryData = CategoryService.getCategoryById(transaction.categoryId);
@@ -1460,8 +1469,12 @@ function closeTransactionDetailsModal() {
 document.body.addEventListener('click', (event) => {
     const item = event.target.closest('.transaction-item');
     if (item) {
-        const transactionId = item.dataset.id;
-        openTransactionDetailsModal(transactionId);
+        try {
+            const transactionId = item.dataset.id;
+            openTransactionDetailsModal(transactionId);
+        } catch (error) {
+            ExceptionService.handle(error);
+        }
     }
 });
 
@@ -1478,7 +1491,6 @@ modalTransactionDetails.addEventListener('click', (event) => {
 btnEditTransaction.addEventListener('click', () => {
     if (selectedTransactionId) {
         const transaction = TransactionService.getTransactionById(selectedTransactionId);
-        closeTransactionDetailsModal();
         if (transaction) {
             closeTransactionDetailsModal();
             openTransactionModal(transaction);
@@ -1577,27 +1589,34 @@ document.body.addEventListener('click', (event) => {
     const deleteBtn = event.target.closest('.btn-action-delete');
 
     if (deleteBtn && document.getElementById('categories-view').classList.contains('hidden') === false) {
-        const categoryCard = deleteBtn.closest('.category-card');
-        const categoryId = categoryCard.dataset.id;
-        const categoryName = CategoryService.getCategoryById(categoryId).name;
+        try {
+            const categoryCard = deleteBtn.closest('.category-card');
+            const categoryId = categoryCard.dataset.id;
+            const categoryName = CategoryService.getCategoryById(categoryId).name;
 
-        if (!categoryName) {
-            alert("Categoria não encontrada.");
-            return;
-        }
-
-        openConfirmModal(
-            categoryId,
-            'Excluir categoria',
-            `Tem certeza que deseja excluir a categoria <strong>${categoryName}</strong>?<br><br>Categorias já utilizadas não podem ser excluídas.`,
-            (idToDelete) => {
-                CategoryService.deleteCategory(idToDelete);
-                const activeView = document.querySelector('.app-view:not(.hidden)');
-                if (activeView) {
-                    updateViewContent(activeView.id);
-                }
+            if (!categoryName) {
+                throw new Error("Categoria não encontrada.");
             }
-        );
+
+            openConfirmModal(
+                categoryId,
+                'Excluir categoria',
+                `Tem certeza que deseja excluir a categoria <strong>${categoryName}</strong>?<br><br>Categorias já utilizadas não podem ser excluídas.`,
+                (idToDelete) => {
+                    try {
+                        CategoryService.deleteCategory(idToDelete);
+                        const activeView = document.querySelector('.app-view:not(.hidden)');
+                        if (activeView) {
+                            updateViewContent(activeView.id);
+                        }
+                    } catch (error) {
+                        ExceptionService.handle(error);
+                    }
+                }
+            );
+        } catch (error) {
+            ExceptionService.handle(error);
+        }
     }
 });
 
@@ -1616,12 +1635,16 @@ function closeExportMenu() {
 }
 
 function exportData(format) {
-    if (format === 'csv') {
-        ExportService.exportToCSV();
-    } else if (format === 'pdf') {
-        ExportService.exportToPDF();
-    } else {
-        alert("Formato de exportação inválido.");
+    try {
+        if (format === 'csv') {
+            ExportService.exportToCSV();
+        } else if (format === 'pdf') {
+            ExportService.exportToPDF();
+        } else {
+            throw new Error("Formato de exportação inválido.");
+        }
+    } catch (error) {
+        ExceptionService.handle(error);
     }
 }
 
@@ -1669,7 +1692,7 @@ window.addEventListener('scroll', () => {
     }
 });
 
-btnBackToTop.addEventListener('click', () => {
+btnBackToTop.addEventListener('click', (event) => {
     event.preventDefault();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 });
@@ -1761,8 +1784,13 @@ btnPrevPage.addEventListener('click', () => {
 });
 
 btnNextPage.addEventListener('click', () => {
-    const data = TransactionService.getFilteredAndPaginated(dateFilters, currentPagination);
-    if (currentPagination.page < data.totalPages) {
+    const totalPages = TransactionService.getTotalPagesFiltered(
+        dateFilters.from, 
+        dateFilters.to, 
+        currentPagination.itemsPerPage
+    );
+
+    if (currentPagination.page < totalPages) {
         currentPagination.page++;
         updateViewContent('statements-view');
     }

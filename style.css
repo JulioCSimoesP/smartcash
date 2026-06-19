@@ -43,7 +43,6 @@ body {
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     font-size: 0.875rem;
-    background-color: var(--primary-bg);
     letter-spacing: 0.02em;
 }
 
@@ -1857,10 +1856,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     transform: scale(0.9);
 }
 
-.btn-back-to-top {
-    display: none;
-}
-
 /* Breakpoints */
 
 @media (min-width: 768px) {
@@ -2535,10 +2530,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
     .filter-input input[type="date"] {
         font-size: 1rem;
-    }
-
-    #btn-add-transaction-statements {
-        display: flex;
     }
 
     .statements-view-controls .btn-primary {
