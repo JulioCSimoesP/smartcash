@@ -120,7 +120,7 @@ const CategoryRepository = {
         return StorageService.get('categories') || [];
     },
 
-    initCategories() {
+    initializeCategories() {
         const existingCategories = this._getRawCategories();
 
         if (existingCategories.length === 0) {
@@ -335,8 +335,8 @@ const DateService = {
 
 const ExportService = {
     _getFilteredData() {
-        const from = dateFilters.from;
-        const to = dateFilters.to;
+        const from = AppState.filters.dateFrom;
+        const to = AppState.filters.dateTo;
         return TransactionRepository.getAllTransactionsInDateRange(from, to);
     },
 
@@ -361,8 +361,8 @@ const ExportService = {
 
         csvContent = Utils.normalizeString(csvContent);
 
-        const dateFrom = dateFilters.from.split('-').reverse().join('-');
-        const dateTo = dateFilters.to.split('-').reverse().join('-');
+        const dateFrom = AppState.filters.dateFrom.split('-').reverse().join('-');
+        const dateTo = AppState.filters.dateTo.split('-').reverse().join('-');
 
         const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
         this._triggerDownload(blob, `smartcash_extrato_${dateFrom}_a_${dateTo}.csv`);
@@ -391,25 +391,36 @@ const ExportService = {
                     body { font-family: 'Helvetica', 'Arial', sans-serif; color: #1E293B; padding: 20px; }
                     h1 { color: #6366F1; margin-bottom: 5px; }
                     p { margin-top: 0; color: #64748B; font-size: 14px; }
-                    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                    th, td { text-align: left; padding: 12px; border-bottom: 1px solid #E2E8F0; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 20px; table-layout: fixed; }
+                    th, td { text-align: left; padding: 12px; border-bottom: 1px solid #E2E8F0; vertical-align: top; }
                     th { background-color: #F1F5F9; color: #334155; font-size: 14px; }
                     td { font-size: 14px; }
                     .is-positive { color: #10B981; font-weight: bold; }
                     .is-negative { color: #EF4444; font-weight: bold; }
+
+                    .column-date { width: 100px; white-space: nowrap; }
+                    .column-category { width: 160px; }
+                    .column-amount { width: 120px; text-align: right; white-space: nowrap; }
+
+                    .truncate {
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
+
                     @media print { button { display: none; } }
                 </style>
             </head>
             <body>
                 <h1>SmartCash</h1>
-                <p>Extrato de Movimentações: ${dateFilters.from.split('-').reverse().join('/')} até ${dateFilters.to.split('-').reverse().join('/')}</p>
+                <p>Extrato de Movimentações: ${AppState.filters.dateFrom.split('-').reverse().join('/')} até ${AppState.filters.dateTo.split('-').reverse().join('/')}</p>
                 <table>
                     <thead>
                         <tr>
-                            <th>Data</th>
-                            <th>Categoria</th>
+                            <th class="column-date">Data</th>
+                            <th class="column-category">Categoria</th>
                             <th>Descrição</th>
-                            <th>Valor</th>
+                            <th class="column-amount">Valor</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -424,9 +435,9 @@ const ExportService = {
             htmlContent += `
                 <tr>
                     <td>${dateFormatted}</td>
-                    <td>${category.name}</td>
-                    <td>${transaction.description}</td>
-                    <td class="${isNegative ? 'is-negative' : 'is-positive'}">${isNegative ? '-' : '+'}${valueFormatted}</td>
+                    <td class="truncate">${category.name}</td>
+                    <td class="truncate">${transaction.description}</td>
+                    <td class="column-amount ${isNegative ? 'is-negative' : 'is-positive'}">${isNegative ? '-' : '+'}${valueFormatted}</td>
                 </tr>
             `;
         });
@@ -438,10 +449,10 @@ const ExportService = {
             </html>
         `;
 
-        const iframeDoc = iframe.contentWindow.document;
-        iframeDoc.open();
-        iframeDoc.write(htmlContent);
-        iframeDoc.close();
+        const iframeDocument = iframe.contentWindow.document;
+        iframeDocument.open();
+        iframeDocument.write(htmlContent);
+        iframeDocument.close();
 
         setTimeout(() => {
             iframe.contentWindow.focus();
@@ -582,13 +593,13 @@ const Renderer = {
                 <div class="category-actions">
                     ${!category.isDefault ? `
                         <button class="btn-action-edit" title="Editar categoria" aria-label="Editar categoria ${category.name}">
-                            ${utilityIconMap.edit}
+                            ${UTILITY_ICON_MAP.edit}
                         </button>
                         <button class="btn-action-delete" title="Excluir categoria" aria-label="Excluir categoria ${category.name}">
-                            ${utilityIconMap.delete}
+                            ${UTILITY_ICON_MAP.delete}
                         </button>
                     ` : `
-                        ${utilityIconMap.lock}
+                        ${UTILITY_ICON_MAP.lock}
                     `}
                 </div>
             `;
@@ -607,7 +618,7 @@ const Renderer = {
             emptyState.className = 'empty-state-card';
             emptyState.innerHTML = `
                 <div class="empty-state-content" role="status" aria-live="polite">
-                    ${utilityIconMap.empty_file}
+                    ${UTILITY_ICON_MAP.empty_file}
                     <p>Não há transações registradas no período.</p>
                 </div>
             `;
@@ -647,7 +658,7 @@ const Renderer = {
                     ${isNegative ? '' : '+'}${Utils.formatCurrency(transaction.amount)}
                 </span>
                 <div class="transaction-action">
-                    ${utilityIconMap.caret_right}
+                    ${UTILITY_ICON_MAP.caret_right}
                 </div>
             `;
             container.appendChild(card);
@@ -704,7 +715,7 @@ const Renderer = {
                 userContainer.innerHTML = `
             <li class="empty-state-card">
                 <div class="empty-state-content" role="status" aria-live="polite">
-                    ${utilityIconMap.empty_folder}
+                    ${UTILITY_ICON_MAP.empty_folder}
                     <p>Você ainda não criou nenhuma categoria personalizada.</p>
                 </div>
             </li>
@@ -744,7 +755,7 @@ const ExceptionService = {
 
         const toast = document.createElement('div');
         toast.className = 'toast';
-        
+
         toast.innerHTML = `
             <div class="toast-icon">
                 <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
@@ -761,7 +772,7 @@ const ExceptionService = {
 
         setTimeout(() => {
             toast.classList.add('is-hiding');
-            
+
             toast.addEventListener('animationend', () => {
                 toast.remove();
             });
@@ -769,26 +780,1172 @@ const ExceptionService = {
     }
 };
 
+/* Controllers */
+
+const ViewController = {
+    elements: {
+        views: document.querySelectorAll('.app-view'),
+        navigationLinks: document.querySelectorAll('.nav-link, .menu-btn, .logo-link, .btn-redirect'),
+        categoryFilterGroup: document.querySelectorAll('input[name="category-filter"]'),
+    },
+
+    initialize() {
+        this.bindEvents();
+    },
+
+    bindEvents() {
+        this.elements.navigationLinks.forEach(link => {
+            link.addEventListener('click', (event) => {
+                event.preventDefault();
+                const viewId = link.dataset.view;
+                this.showView(viewId);
+            });
+        });
+
+        this.elements.categoryFilterGroup.forEach(radio => {
+            radio.addEventListener('change', (event) => {
+                AppState.filters.category = event.target.value;
+                Renderer.renderCategories(AppState.filters.category);
+            });
+        });
+    },
+
+    showView(viewId) {
+        if (viewId === 'categories-view') {
+            this.resetCategoriesFilter();
+        }
+
+        this.elements.views.forEach(view => view.classList.add('hidden'));
+        document.getElementById(viewId).classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        MenuController.close();
+        TransactionFormController.close();
+        CategoryFormController.close();
+        TransactionDetailsController.close();
+        ExportController.close();
+        ConfirmModalController.close();
+
+        StickyButtonController.updateVisibility(viewId);
+        this.updateNavigationLinksActiveState(viewId);
+        this.updateViewContent(viewId, true);
+    },
+
+    updateNavigationLinksActiveState(viewId) {
+        console.log('sdfsd');
+        this.elements.navigationLinks.forEach(link => {
+            const isActive = link.dataset.view === viewId;
+            link.classList.toggle('is-active', isActive);
+
+            if (isActive) {
+                link.setAttribute('aria-current', 'page');
+            } else {
+                link.removeAttribute('aria-current');
+            }
+        });
+    },
+
+    updateViewContent(viewId, isViewSwitch = false) {
+        if (viewId === 'dashboard-view') {
+            const data = TransactionRepository.getFilteredAndPaginated({}, { page: 1, itemsPerPage: 10 });
+            Renderer.renderTransactions(data.data, 'dashboard-transaction-list');
+
+            const titleElement = document.getElementById('history-title');
+            const informationTag = document.getElementById('history-info-tag');
+            const currentMonth = Utils.formatMonthYear(DateService.getFirstDayOfMonth());
+            const formattedTitle = currentMonth.charAt(0).toUpperCase() + currentMonth.slice(1);
+
+            titleElement.textContent = `Histórico - ${formattedTitle}`;
+            informationTag.textContent = `Exibindo as 10 últimas transações do mês de ${formattedTitle}`;
+
+            this.updateDashboardSummary(isViewSwitch);
+
+        } else if (viewId === 'statements-view') {
+            document.getElementById('date-from').value = AppState.filters.dateFrom;
+            document.getElementById('date-to').value = AppState.filters.dateTo;
+
+            const data = TransactionRepository.getFilteredAndPaginated(
+                { from: AppState.filters.dateFrom, to: AppState.filters.dateTo },
+                AppState.pagination
+            );
+
+            Renderer.renderTransactions(data.data, 'statements-transaction-list');
+
+            PaginationController.updateInformation(data);
+            PaginationController.updateSelect();
+            PaginationController.updateButtons(data);
+
+            this.updateStatementsSummary(isViewSwitch);
+
+        } else if (viewId === 'categories-view') {
+            Renderer.renderCategories(AppState.filters.category);
+        }
+    },
+
+    updateDashboardSummary(forceReset = false) {
+        const currentMonthFrom = DateService.getFirstDayOfMonth();
+        const currentMonthTo = DateService.getToday();
+        const previousMonthRange = DateService.getPreviousMonthRange();
+
+        const currentMonthList = TransactionRepository.getAllTransactionsInDateRange(currentMonthFrom, currentMonthTo);
+        const previousMonthList = TransactionRepository.getAllTransactionsInDateRange(previousMonthRange.from, previousMonthRange.to);
+
+        const currentIncome = currentMonthList.filter(transaction => transaction.amount > 0).reduce((accumulator, transaction) => accumulator + transaction.amount, 0);
+        const currentOutcome = currentMonthList.filter(transaction => transaction.amount < 0).reduce((accumulator, transaction) => accumulator + transaction.amount, 0);
+        const previousIncome = previousMonthList.filter(transaction => transaction.amount > 0).reduce((accumulator, transaction) => accumulator + transaction.amount, 0);
+        const previousOutcome = previousMonthList.filter(transaction => transaction.amount < 0).reduce((accumulator, transaction) => accumulator + transaction.amount, 0);
+
+        const totalBalance = currentIncome + currentOutcome;
+        const previousTotalBalance = previousIncome + previousOutcome;
+
+        const incomeValueElement = document.querySelector('.card-incomes .value');
+        const outcomeValueElement = document.querySelector('.card-outcomes .value');
+        const balanceValueElement = document.querySelector('.card-balance .value');
+        const balanceCard = document.querySelector('.card-balance');
+
+        const incomeBadge = document.querySelector('.card-incomes .percentage-tag');
+        const outcomeBadge = document.querySelector('.card-outcomes .percentage-tag');
+        const balanceBadge = document.querySelector('.card-balance .percentage-tag');
+
+        if (forceReset) {
+            if (incomeValueElement) delete incomeValueElement.dataset.currentCents;
+            if (outcomeValueElement) delete outcomeValueElement.dataset.currentCents;
+            if (balanceValueElement) delete balanceValueElement.dataset.currentCents;
+        }
+
+        if (incomeValueElement) Utils.animateCurrency(incomeValueElement, currentIncome, 800, '+');
+        if (outcomeValueElement) Utils.animateCurrency(outcomeValueElement, Math.abs(currentOutcome), 800, '-');
+        if (balanceValueElement) Utils.animateCurrency(balanceValueElement, totalBalance, 800, '');
+        if (balanceCard) balanceCard.classList.toggle('is-negative', totalBalance < 0);
+
+        if (incomeBadge) {
+            if (previousMonthList.length === 0) {
+                incomeBadge.innerHTML = '-';
+                incomeBadge.className = 'percentage-tag is-neutral';
+            } else if (previousIncome === 0) {
+                if (currentIncome > previousIncome) {
+                    incomeBadge.innerHTML = `${UTILITY_ICON_MAP.arrow_up} Alta`;
+                    incomeBadge.className = 'percentage-tag is-positive';
+                } else {
+                    incomeBadge.innerHTML = `= Zero`;
+                    incomeBadge.className = 'percentage-tag is-neutral';
+                }
+            } else {
+                const difference = currentIncome - previousIncome;
+                const percent = (difference / previousIncome) * 100;
+
+                if (currentIncome > previousIncome) {
+                    incomeBadge.innerHTML = `${UTILITY_ICON_MAP.arrow_up} ${Math.abs(percent).toFixed(1)}%`;
+                    incomeBadge.className = 'percentage-tag is-positive';
+                } else if (currentIncome < previousIncome) {
+                    incomeBadge.innerHTML = `${UTILITY_ICON_MAP.arrow_down} ${Math.abs(percent).toFixed(1)}%`;
+                    incomeBadge.className = 'percentage-tag is-negative';
+                } else {
+                    incomeBadge.innerHTML = `=`;
+                    incomeBadge.className = 'percentage-tag is-neutral';
+                }
+            }
+        }
+
+        if (outcomeBadge) {
+            if (previousMonthList.length === 0) {
+                outcomeBadge.innerHTML = '-';
+                outcomeBadge.className = 'percentage-tag is-neutral';
+            } else if (previousOutcome === 0) {
+                if (currentOutcome < previousOutcome) {
+                    outcomeBadge.innerHTML = `${UTILITY_ICON_MAP.arrow_up} Alta`;
+                    outcomeBadge.className = 'percentage-tag is-negative';
+                } else {
+                    outcomeBadge.innerHTML = `= Zero`;
+                    outcomeBadge.className = 'percentage-tag is-neutral';
+                }
+            } else {
+                const difference = currentOutcome - previousOutcome;
+                const percent = (difference / previousOutcome) * 100;
+
+                if (currentOutcome < previousOutcome) {
+                    outcomeBadge.innerHTML = `${UTILITY_ICON_MAP.arrow_up} ${Math.abs(percent).toFixed(1)}%`;
+                    outcomeBadge.className = 'percentage-tag is-negative';
+                } else if (currentOutcome > previousOutcome) {
+                    outcomeBadge.innerHTML = `${UTILITY_ICON_MAP.arrow_down} ${Math.abs(percent).toFixed(1)}%`;
+                    outcomeBadge.className = 'percentage-tag is-positive';
+                } else {
+                    outcomeBadge.innerHTML = `=`;
+                    outcomeBadge.className = 'percentage-tag is-neutral';
+                }
+            }
+        }
+
+        if (balanceBadge) {
+            if (previousMonthList.length === 0) {
+                balanceBadge.innerHTML = '-';
+                balanceBadge.className = 'percentage-tag is-neutral';
+            } else if (previousTotalBalance === 0) {
+                if (totalBalance > 0) {
+                    balanceBadge.innerHTML = `${UTILITY_ICON_MAP.arrow_up} Alta`;
+                    balanceBadge.className = 'percentage-tag is-positive';
+                } else if (totalBalance < 0) {
+                    balanceBadge.innerHTML = `${UTILITY_ICON_MAP.arrow_down} Queda`;
+                    balanceBadge.className = 'percentage-tag is-negative';
+                } else {
+                    balanceBadge.innerHTML = `= Zero`;
+                    balanceBadge.className = 'percentage-tag is-neutral';
+                }
+            } else {
+                const difference = totalBalance - previousTotalBalance;
+                const percent = (difference / previousTotalBalance) * 100;
+
+                if (totalBalance > previousTotalBalance) {
+                    balanceBadge.innerHTML = `${UTILITY_ICON_MAP.arrow_up} ${Math.abs(percent).toFixed(1)}%`;
+                    balanceBadge.className = 'percentage-tag is-positive';
+                } else if (totalBalance < previousTotalBalance) {
+                    balanceBadge.innerHTML = `${UTILITY_ICON_MAP.arrow_down} ${Math.abs(percent).toFixed(1)}%`;
+                    balanceBadge.className = 'percentage-tag is-negative';
+                } else {
+                    balanceBadge.innerHTML = `=`;
+                    balanceBadge.className = 'percentage-tag is-neutral';
+                }
+            }
+        }
+    },
+
+    updateStatementsSummary(forceReset = false) {
+        const filteredTransactions = TransactionRepository.getAllTransactionsInDateRange(AppState.filters.dateFrom, AppState.filters.dateTo);
+
+        const totalIncome = filteredTransactions.filter(transaction => transaction.amount > 0).reduce((accumulator, transaction) => accumulator + transaction.amount, 0);
+        const totalOutcome = filteredTransactions.filter(transaction => transaction.amount < 0).reduce((accumulator, transaction) => accumulator + transaction.amount, 0);
+        const totalBalance = totalIncome + totalOutcome;
+        const totalTransactions = filteredTransactions.length;
+
+        const incomeValueElement = document.querySelector('.income-summary-stat .stat-value');
+        const outcomeValueElement = document.querySelector('.outcome-summary-stat .stat-value');
+        const balanceValueElement = document.querySelector('.balance-summary-stat .stat-value');
+        const countValueElement = document.querySelector('.transactions-summary-stat .stat-value');
+        const balanceStatContainer = document.querySelector('.balance-summary-stat');
+
+        if (balanceStatContainer) balanceStatContainer.classList.toggle('is-negative', totalBalance < 0);
+
+        if (forceReset) {
+            if (incomeValueElement) delete incomeValueElement.dataset.currentCents;
+            if (outcomeValueElement) delete outcomeValueElement.dataset.currentCents;
+            if (balanceValueElement) delete balanceValueElement.dataset.currentCents;
+            if (countValueElement) delete countValueElement.dataset.currentValue;
+        }
+
+        if (incomeValueElement) Utils.animateCurrency(incomeValueElement, totalIncome, 800, '+');
+        if (outcomeValueElement) Utils.animateCurrency(outcomeValueElement, Math.abs(totalOutcome), 800, '-');
+        if (balanceValueElement) Utils.animateCurrency(balanceValueElement, totalBalance, 800, '');
+        if (countValueElement) Utils.animateCount(countValueElement, totalTransactions, 800);
+    },
+
+    resetCategoriesFilter() {
+        AppState.filters.category = 'all';
+        const filterAll = document.getElementById('filter-all');
+        if (filterAll) filterAll.checked = true;
+    },
+}
+
+const MenuController = {
+    elements: {
+        buttonMenuToggle: document.querySelector('.btn-menu-toggle'),
+        buttonCloseMenu: document.getElementById('btn-close-menu'),
+        modalMenu: document.getElementById('modal-menu'),
+    },
+
+    initialize() {
+        this.bindEvents();
+    },
+
+    bindEvents() {
+        this.elements.buttonMenuToggle.addEventListener('click', () => this.toggle());
+
+        this.elements.buttonCloseMenu.addEventListener('click', () => this.close());
+
+        this.elements.modalMenu.addEventListener('click', (event) => {
+            if (event.target.id === 'modal-menu') {
+                this.close();
+            }
+        });
+    },
+
+    toggle() {
+        this.elements.modalMenu.classList.toggle('hidden');
+        const isHidden = this.elements.modalMenu.classList.contains('hidden');
+
+        this.elements.buttonMenuToggle.classList.toggle('is-active', !isHidden);
+        this.elements.buttonMenuToggle.setAttribute('aria-expanded', !isHidden);
+    },
+
+    close() {
+        if (!this.elements.modalMenu.classList.contains('hidden')) {
+            this.elements.modalMenu.classList.add('hidden');
+        }
+        this.elements.buttonMenuToggle.classList.remove('is-active');
+        this.elements.buttonMenuToggle.setAttribute('aria-expanded', 'false');
+    }
+}
+
+const StickyButtonController = {
+    elements: {
+        buttonStickyTransaction: document.getElementById('btn-add-transaction-mobile'),
+        buttonStickyCategory: document.getElementById('btn-add-category-mobile'),
+    },
+
+    updateVisibility(activeViewId) {
+        if (activeViewId === 'dashboard-view' || activeViewId === 'statements-view') {
+            this.elements.buttonStickyTransaction.classList.remove('hidden');
+            this.elements.buttonStickyCategory.classList.add('hidden');
+        } else if (activeViewId === 'categories-view') {
+            this.elements.buttonStickyTransaction.classList.add('hidden');
+            this.elements.buttonStickyCategory.classList.remove('hidden');
+        } else {
+            this.elements.buttonStickyTransaction.classList.add('hidden');
+            this.elements.buttonStickyCategory.classList.add('hidden');
+        }
+    }
+}
+
+const TransactionFormController = {
+    elements: {
+        modalContainer: document.getElementById('modal-transaction-form'),
+        buttonClose: document.getElementById('btn-close-transaction-form'),
+        buttonsOpen: [
+            document.getElementById('btn-add-transaction-dashboard'),
+            document.getElementById('btn-add-transaction-statements'),
+            document.getElementById('btn-add-transaction-mobile')
+        ],
+        form: document.getElementById('transaction-form'),
+        inputAmount: document.getElementById('transaction-form-amount'),
+        inputType: document.getElementById('transaction-form-type'),
+        titleElement: document.querySelector('#modal-transaction-form .transaction-form-title'),
+        descriptionElement: document.querySelector('#modal-transaction-form .transaction-form-description'),
+        buttonSubmit: document.querySelector('#modal-transaction-form button[type="submit"]')
+    },
+
+    initialize() {
+        this.bindEvents();
+    },
+
+    bindEvents() {
+        this.elements.buttonsOpen.forEach(button => {
+            if (button) {
+                button.addEventListener('click', () => this.open());
+            }
+        });
+
+        this.elements.buttonClose.addEventListener('click', () => this.close());
+
+        this.elements.modalContainer.addEventListener('click', (event) => {
+            if (event.target.id === 'modal-transaction-form') {
+                this.close();
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && !this.elements.modalContainer.classList.contains('hidden')) {
+                this.close();
+            }
+        });
+
+        this.elements.form.addEventListener('submit', (event) => this.handleSubmit(event));
+
+        this.elements.inputAmount.addEventListener('input', (event) => this.handleAmountInput(event));
+        this.elements.inputAmount.addEventListener('keydown', (event) => this.handleAmountKeydown(event));
+        this.elements.inputAmount.addEventListener('click', (event) => {
+            this.resetAmountIfEmpty();
+            this.forceCursorToEnd(event.target);
+        });
+        this.elements.inputAmount.addEventListener('focus', (event) => {
+            this.resetAmountIfEmpty();
+            this.forceCursorToEnd(event.target);
+        });
+        this.elements.inputType.addEventListener('change', (event) => {
+            const selectedType = event.target.value;
+            Renderer.renderCategoryOptions('transaction-form-category', selectedType);
+        });
+    },
+
+    open(transaction = null) {
+        if (transaction) {
+            AppState.selectedTransactionId = transaction.id;
+            this.elements.titleElement.textContent = 'Editar Transação';
+            this.elements.descriptionElement.textContent = 'Atualize os dados abaixo para editar sua transação.';
+            this.elements.buttonSubmit.textContent = 'Salvar alterações';
+
+            const typeValue = transaction.amount > 0 ? 'income' : 'outcome';
+            Renderer.renderCategoryOptions('transaction-form-category', typeValue);
+            this.fillForm(transaction);
+        } else {
+            AppState.selectedTransactionId = null;
+            this.elements.titleElement.textContent = 'Nova Transação';
+            this.elements.descriptionElement.textContent = 'Preencha os dados abaixo para registrar sua transação.';
+            this.elements.buttonSubmit.textContent = 'Registrar transação';
+            this.elements.form.reset();
+
+            this.elements.inputType.value = 'outcome';
+            Renderer.renderCategoryOptions('transaction-form-category', this.elements.inputType.value);
+        }
+
+        this.elements.modalContainer.classList.remove('hidden');
+        document.body.classList.add('modal-open');
+
+        setTimeout(() => {
+            document.getElementById('btn-close-transaction-form').focus();
+        }, 100);
+    },
+
+    fillForm(transaction) {
+        this.elements.form.querySelector('[name="description"]').value = transaction.description;
+        this.elements.form.querySelector('[name="date"]').value = transaction.date;
+        this.elements.form.querySelector('[name="categoryId"]').value = transaction.categoryId;
+
+        const typeValue = transaction.amount > 0 ? 'income' : 'outcome';
+        this.elements.form.querySelector('[name="type"]').value = typeValue;
+
+        const rawAmount = Math.abs(transaction.amount);
+        this.elements.inputAmount.value = Utils.formatCurrency(rawAmount);
+    },
+
+    close() {
+        this.elements.modalContainer.classList.add('hidden');
+        document.body.classList.remove('modal-open');
+        AppState.selectedTransactionId = null;
+    },
+
+    handleSubmit(event) {
+        event.preventDefault();
+
+        try {
+            const formData = new FormData(this.elements.form);
+            const rawData = Object.fromEntries(formData.entries());
+            const cleanData = SanitizationService.cleanTransaction(rawData);
+            const validationResult = ValidationService.validateTransaction(cleanData);
+
+            const activeView = document.querySelector('.app-view:not(.hidden)');
+            const activeViewId = activeView ? activeView.id : null;
+
+            if (!validationResult.isValid) {
+                throw new Error(validationResult.errors.join("\n"));
+            }
+
+            if (AppState.selectedTransactionId) {
+                TransactionRepository.updateTransaction(AppState.selectedTransactionId, cleanData);
+            } else {
+                TransactionRepository.addTransaction(cleanData);
+            }
+
+            ViewController.updateViewContent(activeViewId);
+            this.elements.form.reset();
+            this.close();
+        } catch (error) {
+            ExceptionService.handle(error);
+        }
+    },
+
+    handleAmountInput(event) {
+        let value = event.target.value;
+        value = value.replace(/\D/g, '');
+
+        if (value === '') {
+            event.target.value = 'R$ 0,00';
+            return;
+        }
+
+        const cents = parseInt(value, 10);
+        event.target.value = Utils.formatCurrency(cents);
+        this.forceCursorToEnd(event.target);
+    },
+
+    handleAmountKeydown(event) {
+        const forbiddenKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'];
+        if (forbiddenKeys.includes(event.key)) {
+            event.preventDefault();
+        }
+    },
+
+    resetAmountIfEmpty() {
+        if (this.elements.inputAmount.value === '') {
+            this.elements.inputAmount.value = 'R$ 0,00';
+        }
+    },
+
+    forceCursorToEnd(inputElement) {
+        const length = inputElement.value.length;
+        inputElement.setSelectionRange(length, length);
+    }
+}
+
+const CategoryFormController = {
+    elements: {
+        modalContainer: document.getElementById('modal-category-form'),
+        buttonClose: document.getElementById('btn-close-category-form'),
+        form: document.getElementById('category-form'),
+        buttonsOpen: [
+            document.getElementById('btn-add-category-desktop'),
+            document.getElementById('btn-add-category-mobile')
+        ],
+        titleElement: document.querySelector('#modal-category-form .category-form-title'),
+        descriptionElement: document.querySelector('#modal-category-form .category-form-description'),
+        buttonSubmit: document.querySelector('#modal-category-form button[type="submit"]')
+    },
+
+    initialize() {
+        this.bindEvents();
+    },
+
+    bindEvents() {
+        this.elements.buttonsOpen.forEach(button => {
+            if (button) {
+                button.addEventListener('click', () => this.open());
+            }
+        });
+
+        this.elements.buttonClose.addEventListener('click', () => this.close());
+
+        this.elements.modalContainer.addEventListener('click', (event) => {
+            if (event.target.id === 'modal-category-form') {
+                this.close();
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && !this.elements.modalContainer.classList.contains('hidden')) {
+                this.close();
+            }
+        });
+
+        this.elements.form.addEventListener('submit', (event) => this.handleSubmit(event));
+    },
+
+    open(category = null) {
+        if (category) {
+            AppState.selectedCategoryId = category.id;
+            this.elements.titleElement.textContent = 'Editar Categoria';
+            this.elements.descriptionElement.textContent = 'Atualize os dados abaixo para editar sua categoria.';
+            this.elements.buttonSubmit.textContent = 'Salvar alterações';
+
+            Renderer.renderIconOptions('category-icon');
+            this.fillForm(category);
+        } else {
+            AppState.selectedCategoryId = null;
+            this.elements.titleElement.textContent = 'Nova Categoria';
+            this.elements.descriptionElement.textContent = 'Preencha os dados abaixo para registrar sua categoria.';
+            this.elements.buttonSubmit.textContent = 'Registrar Categoria';
+            this.elements.form.reset();
+
+            Renderer.renderIconOptions('category-icon');
+        }
+
+        this.elements.modalContainer.classList.remove('hidden');
+        document.body.classList.add('modal-open');
+
+        setTimeout(() => {
+            document.getElementById('btn-close-category-form').focus();
+        }, 100);
+    },
+
+    fillForm(category) {
+        this.elements.form.querySelector('[name="name"]').value = category.name;
+        this.elements.form.querySelector('[name="type"]').value = category.type;
+        this.elements.form.querySelector('[name="iconId"]').value = category.iconId;
+    },
+
+    close() {
+        this.elements.modalContainer.classList.add('hidden');
+        document.body.classList.remove('modal-open');
+        AppState.selectedCategoryId = null;
+    },
+
+    handleSubmit(event) {
+        event.preventDefault();
+
+        try {
+            const formData = new FormData(this.elements.form);
+            const rawData = Object.fromEntries(formData.entries());
+            const cleanData = SanitizationService.cleanCategory(rawData);
+            const validationResult = ValidationService.validateCategory(cleanData);
+
+            const activeView = document.querySelector('.app-view:not(.hidden)');
+            const activeViewId = activeView ? activeView.id : null;
+
+            if (!validationResult.isValid) {
+                throw new Error(validationResult.errors.join("\n"));
+            }
+
+            if (AppState.selectedCategoryId) {
+                CategoryRepository.updateCategory(AppState.selectedCategoryId, cleanData);
+            } else {
+                CategoryRepository.addCategory(cleanData);
+            }
+
+            ViewController.updateViewContent(activeViewId);
+            this.elements.form.reset();
+            this.close();
+        } catch (error) {
+            ExceptionService.handle(error);
+        }
+    }
+}
+
+const TransactionDetailsController = {
+    elements: {
+        modalContainer: document.getElementById('modal-transaction-details'),
+        buttonClose: document.getElementById('btn-close-transaction-details'),
+        buttonDelete: document.getElementById('btn-delete-transaction'),
+        buttonEdit: document.getElementById('btn-edit-transaction'),
+        iconContainer: document.querySelector('#modal-transaction-details .category-icon-bg'),
+        categoryNameElement: document.querySelector('#modal-transaction-details .transaction-category span'),
+        descriptionElement: document.querySelector('#modal-transaction-details .transaction-details-description'),
+        amountElement: document.querySelector('#modal-transaction-details .transaction-details-amount'),
+        dateElement: document.querySelector('#modal-transaction-details .transaction-details-date')
+    },
+
+    initialize() {
+        this.bindEvents();
+    },
+
+    bindEvents() {
+        document.body.addEventListener('click', (event) => {
+            const item = event.target.closest('.transaction-item');
+            if (item) {
+                try {
+                    const transactionId = item.dataset.id;
+                    this.open(transactionId);
+                } catch (error) {
+                    ExceptionService.handle(error);
+                }
+            }
+        });
+
+        document.body.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                const item = event.target.closest('.transaction-item');
+                if (item) {
+                    event.preventDefault();
+                    try {
+                        const transactionId = item.dataset.id;
+                        this.open(transactionId);
+                    } catch (error) {
+                        ExceptionService.handle(error);
+                    }
+                }
+            }
+        });
+
+        this.elements.buttonClose.addEventListener('click', () => this.close());
+
+        this.elements.modalContainer.addEventListener('click', (event) => {
+            if (event.target.id === 'modal-transaction-details') {
+                this.close();
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && !this.elements.modalContainer.classList.contains('hidden')) {
+                this.close();
+            }
+        });
+
+        this.elements.buttonEdit.addEventListener('click', () => this.handleEdit());
+        this.elements.buttonDelete.addEventListener('click', () => this.handleDelete());
+    },
+
+    open(transactionId) {
+        AppState.selectedTransactionId = transactionId;
+
+        const transaction = TransactionRepository.getTransactionById(transactionId);
+        if (!transaction) {
+            throw new Error("Transação não encontrada.");
+        }
+
+        const categoryData = CategoryRepository.getCategoryById(transaction.categoryId);
+        const categoryIcon = IconHelper.getIconById(categoryData.iconId);
+
+        const isNegative = transaction.amount < 0;
+        const [year, month, day] = transaction.date.split('-');
+        const dateFormatted = `${day}/${month}/${year}`;
+
+        if (this.elements.iconContainer) this.elements.iconContainer.innerHTML = categoryIcon;
+        if (this.elements.categoryNameElement) this.elements.categoryNameElement.textContent = categoryData.name;
+        if (this.elements.descriptionElement) this.elements.descriptionElement.textContent = transaction.description;
+
+        if (this.elements.amountElement) {
+            this.elements.amountElement.textContent = `${isNegative ? '' : '+'}${Utils.formatCurrency(transaction.amount)}`;
+            this.elements.amountElement.classList.toggle('is-negative', isNegative);
+            this.elements.amountElement.classList.toggle('is-positive', !isNegative);
+        }
+
+        if (this.elements.dateElement) {
+            this.elements.dateElement.textContent = dateFormatted;
+            this.elements.dateElement.setAttribute('datetime', transaction.date);
+        }
+
+        this.elements.modalContainer.classList.remove('hidden');
+        document.body.classList.add('modal-open');
+
+        setTimeout(() => {
+            this.elements.buttonClose.focus();
+        }, 100);
+    },
+
+    close() {
+        this.elements.modalContainer.classList.add('hidden');
+        document.body.classList.remove('modal-open');
+        AppState.selectedTransactionId = null;
+    },
+
+    handleEdit() {
+        if (AppState.selectedTransactionId) {
+            const transaction = TransactionRepository.getTransactionById(AppState.selectedTransactionId);
+            if (transaction) {
+                this.close();
+                TransactionFormController.open(transaction);
+            }
+        }
+    },
+
+    handleDelete() {
+        if (AppState.selectedTransactionId) {
+            ConfirmModalController.open(
+                AppState.selectedTransactionId,
+                "Excluir transação",
+                "Você tem certeza que deseja remover esta transação?<br><br><strong>Essa ação não poderá ser desfeita</strong> e o valor será removido do seu saldo atual.",
+                (idToDelete) => {
+                    TransactionRepository.deleteTransaction(idToDelete);
+                    const activeView = document.querySelector('.app-view:not(.hidden)');
+                    if (activeView) {
+                        ViewController.updateViewContent(activeView.id);
+                    }
+                }
+            );
+        }
+    }
+}
+
+const ConfirmModalController = {
+    elements: {
+        modalContainer: document.getElementById('modal-confirm'),
+        buttonCancel: document.getElementById('btn-confirm-cancel'),
+        buttonConfirm: document.getElementById('btn-confirm-delete'),
+        titleElement: document.getElementById('confirm-title'),
+        descriptionElement: document.getElementById('confirm-description')
+    },
+
+    _abortController: new AbortController(),
+
+    initialize() {
+        this.bindEvents();
+    },
+
+    bindEvents() {
+        this.elements.buttonCancel.addEventListener('click', () => this.close());
+
+        this.elements.modalContainer.addEventListener('click', (event) => {
+            if (event.target.id === 'modal-confirm') {
+                this.close();
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && !this.elements.modalContainer.classList.contains('hidden')) {
+                this.close();
+            }
+        });
+    },
+
+    open(idToDelete, title, description, confirmCallback) {
+        this.elements.titleElement.textContent = title;
+        this.elements.descriptionElement.innerHTML = description;
+
+        this._abortController.abort();
+        this._abortController = new AbortController();
+
+        this.elements.buttonConfirm.addEventListener('click', () => {
+            confirmCallback(idToDelete);
+            this.close();
+
+            if (!TransactionDetailsController.elements.modalContainer.classList.contains('hidden')) {
+                TransactionDetailsController.close();
+            }
+        }, { signal: this._abortController.signal, once: true });
+
+        this.elements.modalContainer.classList.remove('hidden');
+        document.body.classList.add('modal-open');
+
+        setTimeout(() => {
+            this.elements.buttonCancel.focus();
+        }, 100);
+    },
+
+    close() {
+        this._abortController.abort();
+        this._abortController = new AbortController();
+
+        this.elements.modalContainer.classList.add('hidden');
+
+        if (TransactionDetailsController.elements.modalContainer.classList.contains('hidden')) {
+            document.body.classList.remove('modal-open');
+        }
+    }
+}
+
+const CategoryCardsController = {
+    elements: {
+        categoriesView: document.getElementById('categories-view')
+    },
+
+    initialize() {
+        this.bindEvents();
+    },
+
+    bindEvents() {
+        document.body.addEventListener('click', (event) => {
+            if (!this.elements.categoriesView.classList.contains('hidden')) {
+
+                const editButton = event.target.closest('.btn-action-edit');
+                if (editButton) {
+                    this.handleEdit(editButton);
+                    return;
+                }
+
+                const deleteButton = event.target.closest('.btn-action-delete');
+                if (deleteButton) {
+                    this.handleDelete(deleteButton);
+                    return;
+                }
+            }
+        });
+    },
+
+    handleEdit(buttonElement) {
+        const categoryCard = buttonElement.closest('.category-card');
+        const categoryId = categoryCard.dataset.id;
+        const category = CategoryRepository.getCategoryById(categoryId);
+
+        CategoryFormController.open(category);
+    },
+
+    handleDelete(buttonElement) {
+        try {
+            const categoryCard = buttonElement.closest('.category-card');
+            const categoryId = categoryCard.dataset.id;
+            const categoryName = CategoryRepository.getCategoryById(categoryId).name;
+
+            if (!categoryName) {
+                throw new Error("Categoria não encontrada.");
+            }
+
+            ConfirmModalController.open(
+                categoryId,
+                'Excluir categoria',
+                `Tem certeza que deseja excluir a categoria <strong>${categoryName}</strong>?<br><br>Categorias já utilizadas não podem ser excluídas.`,
+                (idToDelete) => {
+                    try {
+                        CategoryRepository.deleteCategory(idToDelete);
+
+                        const activeView = document.querySelector('.app-view:not(.hidden)');
+                        if (activeView) {
+                            ViewController.updateViewContent(activeView.id);
+                        }
+                    } catch (error) {
+                        ExceptionService.handle(error);
+                    }
+                }
+            );
+        } catch (error) {
+            ExceptionService.handle(error);
+        }
+    }
+}
+
+const ExportController = {
+    elements: {
+        buttonExportAction: document.getElementById('btn-export-action'),
+        buttonExportToggle: document.getElementById('btn-export-toggle'),
+        exportMenuOptions: document.getElementById('export-menu-options')
+    },
+
+    initialize() {
+        this.bindEvents();
+    },
+
+    bindEvents() {
+        this.elements.buttonExportToggle.addEventListener('click', () => this.toggle());
+
+        this.elements.exportMenuOptions.addEventListener('click', (event) => this.handleOptionSelect(event));
+
+        this.elements.buttonExportAction.addEventListener('click', () => {
+            const format = this.elements.buttonExportToggle.dataset.format;
+            this.exportData(format);
+        });
+
+        document.addEventListener('click', (event) => {
+            const isClickInsideExport = this.elements.buttonExportToggle.contains(event.target) ||
+                this.elements.exportMenuOptions.contains(event.target);
+
+            if (!isClickInsideExport && !this.elements.exportMenuOptions.classList.contains('hidden')) {
+                this.close();
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && !this.elements.exportMenuOptions.classList.contains('hidden')) {
+                this.close();
+            }
+        });
+    },
+
+    toggle() {
+        this.elements.exportMenuOptions.classList.toggle('hidden');
+        const isHidden = this.elements.exportMenuOptions.classList.contains('hidden');
+        this.elements.buttonExportToggle.setAttribute('aria-expanded', !isHidden);
+    },
+
+    close() {
+        this.elements.exportMenuOptions.classList.add('hidden');
+        this.elements.buttonExportToggle.setAttribute('aria-expanded', 'false');
+    },
+
+    handleOptionSelect(event) {
+        const option = event.target.closest('.export-option');
+        if (!option) return;
+
+        const currentFormat = this.elements.buttonExportToggle.querySelector('.current-format');
+
+        this.elements.buttonExportToggle.dataset.format = option.dataset.format;
+        currentFormat.textContent = option.textContent;
+
+        this.toggle();
+    },
+
+    exportData(format) {
+        try {
+            if (format === 'csv') {
+                ExportService.exportToCSV();
+            } else if (format === 'pdf') {
+                ExportService.exportToPDF();
+            } else {
+                throw new Error("Formato de exportação inválido.");
+            }
+        } catch (error) {
+            ExceptionService.handle(error);
+        }
+    }
+}
+
+const BackToTopController = {
+    elements: {
+        buttonBackToTop: document.querySelector('.btn-back-to-top')
+    },
+
+    initialize() {
+        if (!this.elements.buttonBackToTop) return;
+
+        this.bindEvents();
+    },
+
+    bindEvents() {
+        window.addEventListener('scroll', () => this.handleScroll());
+
+        this.elements.buttonBackToTop.addEventListener('click', (event) => {
+            event.preventDefault();
+            this.scrollToTop();
+        });
+    },
+
+    handleScroll() {
+        if (window.scrollY > 300) {
+            this.elements.buttonBackToTop.classList.add('is-visible');
+        } else {
+            this.elements.buttonBackToTop.classList.remove('is-visible');
+        }
+    },
+
+    scrollToTop() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+};
+
+const PaginationController = {
+    elements: {
+        selectItemsPerPage: document.getElementById('items-per-page'),
+        buttonPreviousPage: document.querySelector('.page-btn[aria-label="Página anterior"]'),
+        buttonNextPage: document.querySelector('.page-btn[aria-label="Próxima página"]'),
+        containerPageNumbers: document.querySelector('.page-numbers-container'),
+        inputDateFrom: document.getElementById('date-from'),
+        inputDateTo: document.getElementById('date-to'),
+        informationTextElement: document.querySelector('.current-shown-items')
+    },
+
+    initialize() {
+        this.bindEvents();
+    },
+
+    bindEvents() {
+        this.elements.selectItemsPerPage.addEventListener('change', (event) => this.handleItemsPerPageChange(event));
+
+        this.elements.buttonPreviousPage.addEventListener('click', () => this.handlePreviousPage());
+        this.elements.buttonNextPage.addEventListener('click', () => this.handleNextPage());
+
+        this.elements.inputDateFrom.addEventListener('change', (event) => this.handleDateFromChange(event));
+        this.elements.inputDateTo.addEventListener('change', (event) => this.handleDateToChange(event));
+    },
+
+    updateInformation(paginationData) {
+        if (!this.elements.informationTextElement) return;
+
+        const start = (AppState.pagination.page - 1) * AppState.pagination.itemsPerPage + 1;
+        const end = Math.min(AppState.pagination.page * AppState.pagination.itemsPerPage, paginationData.totalItems);
+
+        this.elements.informationTextElement.textContent = `${paginationData.totalItems === 0 ? 0 : start}-${end} de ${paginationData.totalItems} itens`;
+    },
+
+    updateSelect() {
+        const options = this.elements.selectItemsPerPage.querySelectorAll('option');
+        options.forEach(option => option.removeAttribute('selected'));
+
+        this.elements.selectItemsPerPage.value = AppState.pagination.itemsPerPage.toString();
+        const selectedOption = this.elements.selectItemsPerPage.querySelector(`option[value="${AppState.pagination.itemsPerPage}"]`);
+        if (selectedOption) {
+            selectedOption.setAttribute('selected', 'selected');
+        }
+    },
+
+    updateButtons(paginationData) {
+        const totalPages = paginationData.totalPages || 1;
+
+        this.elements.buttonPreviousPage.disabled = AppState.pagination.page === 1;
+        this.elements.buttonNextPage.disabled = AppState.pagination.page === totalPages || paginationData.totalItems === 0;
+
+        this.elements.containerPageNumbers.innerHTML = '';
+
+        let startPage = Math.max(1, AppState.pagination.page - 1);
+        let endPage = Math.min(totalPages, startPage + 2);
+
+        if (endPage - startPage < 2) {
+            startPage = Math.max(1, endPage - 2);
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            const buttonPage = document.createElement('button');
+            buttonPage.className = 'page-btn';
+            buttonPage.textContent = i;
+            buttonPage.setAttribute('aria-label', `Página ${i}`);
+
+            if (i === AppState.pagination.page) {
+                buttonPage.classList.add('is-active');
+                buttonPage.setAttribute('aria-current', 'page');
+            }
+
+            buttonPage.addEventListener('click', () => {
+                AppState.pagination.page = i;
+                ViewController.updateViewContent('statements-view');
+            });
+
+            this.elements.containerPageNumbers.appendChild(buttonPage);
+        }
+
+        if (paginationData.totalItems === 0) {
+            this.elements.containerPageNumbers.innerHTML = '<button class="page-btn is-active" disabled>1</button>';
+        }
+    },
+
+    handleItemsPerPageChange(event) {
+        let itemsPerPageNumber = parseInt(event.target.value);
+        if (isNaN(itemsPerPageNumber) || itemsPerPageNumber <= 0) {
+            itemsPerPageNumber = 10;
+        }
+        AppState.pagination.itemsPerPage = itemsPerPageNumber;
+        SettingsService.setItemsPerPage(itemsPerPageNumber);
+        AppState.pagination.page = 1;
+
+        ViewController.updateViewContent('statements-view');
+    },
+
+    handlePreviousPage() {
+        if (AppState.pagination.page > 1) {
+            AppState.pagination.page--;
+            ViewController.updateViewContent('statements-view');
+        }
+    },
+
+    handleNextPage() {
+        const totalPages = TransactionRepository.getTotalPagesFiltered(
+            AppState.filters.dateFrom,
+            AppState.filters.dateTo,
+            AppState.pagination.itemsPerPage
+        );
+
+        if (AppState.pagination.page < totalPages) {
+            AppState.pagination.page++;
+            ViewController.updateViewContent('statements-view');
+        }
+    },
+
+    handleDateFromChange(event) {
+        const dateTo = this.elements.inputDateTo.value;
+        AppState.filters.dateFrom = event.target.value;
+
+        if (AppState.filters.dateFrom > dateTo) {
+            AppState.filters.dateFrom = dateTo;
+            this.elements.inputDateFrom.value = dateTo;
+        }
+
+        AppState.pagination.page = 1;
+        ViewController.updateViewContent('statements-view');
+    },
+
+    handleDateToChange(event) {
+        const dateFrom = this.elements.inputDateFrom.value;
+        AppState.filters.dateTo = event.target.value;
+
+        if (AppState.filters.dateTo < dateFrom) {
+            AppState.filters.dateTo = dateFrom;
+            this.elements.inputDateTo.value = dateFrom;
+        }
+
+        AppState.pagination.page = 1;
+        ViewController.updateViewContent('statements-view');
+    }
+}
+
 /* App initialization */
 
-let abortController = new AbortController();
-let selectedTransactionId = null;
-let selectedCategoryId = null;
-let currentPagination = {
-    page: 1,
-    itemsPerPage: SettingsService.getItemsPerPage() || 10
+const AppState = {
+    selectedTransactionId: null,
+    selectedCategoryId: null,
+    pagination: {
+        page: 1,
+        itemsPerPage: SettingsService.getItemsPerPage() || 10
+    },
+    filters: {
+        dateFrom: DateService.getFirstDayOfMonth(),
+        dateTo: DateService.getToday(),
+        category: 'all'
+    },
 };
-let dateFilters = {
-    from: DateService.getFirstDayOfMonth(),
-    to: DateService.getToday()
-};
-let currentCategoryFilter = 'all';
 
-window.addEventListener('DOMContentLoaded', () => {
-    const defaultViewId = 'dashboard-view';
-    CategoryRepository.initCategories();
-    showView(defaultViewId);
-});
+const AppController = {
+    initialize() {
+        CategoryRepository.initializeCategories();
+        MenuController.initialize();
+        TransactionFormController.initialize();
+        CategoryFormController.initialize();
+        TransactionDetailsController.initialize();
+        ConfirmModalController.initialize();
+        CategoryCardsController.initialize();
+        ExportController.initialize();
+        BackToTopController.initialize();
+        PaginationController.initialize();
+        ViewController.initialize();
+
+        ViewController.showView('dashboard-view');
+    }
+};
+
+window.addEventListener('DOMContentLoaded', () => AppController.initialize());
+
+/* Static assets */
 
 const CATEGORY_ICON_LIBRARY = [
     { id: "handshake", name: "Aperto de mão", svg: `<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M254.3,107.91,228.78,56.85a16,16,0,0,0-21.47-7.15L182.44,62.13,130.05,48.27a8.14,8.14,0,0,0-4.1,0L73.56,62.13,48.69,49.7a16,16,0,0,0-21.47,7.15L1.7,107.9a16,16,0,0,0,7.15,21.47l27,13.51,55.49,39.63a8.06,8.06,0,0,0,2.71,1.25l64,16a8,8,0,0,0,7.6-2.1l55.07-55.08,26.42-13.21a16,16,0,0,0,7.15-21.46Zm-54.89,33.37L165,113.72a8,8,0,0,0-10.68.61C136.51,132.27,116.66,130,104,122L147.24,80h31.81l27.21,54.41ZM41.53,64,62,74.22,36.43,125.27,16,115.06Zm116,119.13L99.42,168.61l-49.2-35.14,28-56L128,64.28l9.8,2.59-45,43.68-.08.09a16,16,0,0,0,2.72,24.81c20.56,13.13,45.37,11,64.91-5L188,152.66Zm62-57.87-25.52-51L214.47,64,240,115.06Zm-87.75,92.67a8,8,0,0,1-7.75,6.06,8.13,8.13,0,0,1-1.95-.24L80.41,213.33a7.89,7.89,0,0,1-2.71-1.25L51.35,193.26a8,8,0,0,1,9.3-13l25.11,17.94L126,208.24A8,8,0,0,1,131.82,217.94Z"></path></svg>` },
@@ -852,7 +2009,7 @@ const CATEGORY_ICON_LIBRARY = [
     { id: "default-icon", name: "Ícone padrão", svg: `<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M71.59,61.47a8,8,0,0,0-15.18,0l-40,120A8,8,0,0,0,24,192h80a8,8,0,0,0,7.59-10.53ZM35.1,176,64,89.3,92.9,176ZM208,76a52,52,0,1,0-52,52A52.06,52.06,0,0,0,208,76Zm-88,0a36,36,0,1,1,36,36A36,36,0,0,1,120,76Zm104,68H136a8,8,0,0,0-8,8v56a8,8,0,0,0,8,8h88a8,8,0,0,0,8-8V152A8,8,0,0,0,224,144Zm-8,56H144V160h72Z"></path></svg>` },
 ];
 
-const utilityIconMap = {
+const UTILITY_ICON_MAP = {
     arrow_down: `<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"> <path d="M205.66,149.66l-72,72a8,8,0,0,1-11.32,0l-72-72a8,8,0,0,1,11.32-11.32L120,196.69V40a8,8,0,0,1,16,0V196.69l58.34-58.35a8,8,0,0,1,11.32,11.32Z"> </path> </svg>`,
     arrow_up: `<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"> <path d="M205.66,117.66a8,8,0,0,1-11.32,0L136,59.31V216a8,8,0,0,1-16,0V59.31L61.66,117.66a8,8,0,0,1-11.32-11.32l72-72a8,8,0,0,1,11.32,0l72,72A8,8,0,0,1,205.66,117.66Z"> </path> </svg>`,
     edit: `<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"> <path d="M227.32,73.37,182.63,28.69a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H216a8,8,0,0,0,0-16H115.32l112-112A16,16,0,0,0,227.32,73.37ZM92.69,208H48V163.31l88-88L180.69,120ZM192,108.69,147.32,64l24-24L216,84.69Z"> </path> </svg>`,
@@ -862,1038 +2019,3 @@ const utilityIconMap = {
     empty_folder: `<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M24,80V64A16,16,0,0,1,40,48H93.33a16.12,16.12,0,0,1,9.6,3.2L132.8,73.6a8,8,0,1,1-9.6,12.8L93.33,64H40V80a8,8,0,0,1-16,0ZM88,200H40v-8a8,8,0,0,0-16,0v8.62A15.4,15.4,0,0,0,39.38,216H88a8,8,0,0,0,0-16Zm72,0H128a8,8,0,0,0,0,16h32a8,8,0,0,0,0-16Zm64-56a8,8,0,0,0-8,8v48H200a8,8,0,0,0,0,16h16.89A15.13,15.13,0,0,0,232,200.89V152A8,8,0,0,0,224,144Zm-8-72H168a8,8,0,0,0,0,16h48v24a8,8,0,0,0,16,0V88A16,16,0,0,0,216,72ZM32,160a8,8,0,0,0,8-8V120a8,8,0,0,0-16,0v32A8,8,0,0,0,32,160Z"></path></svg>`,
     caret_right: `<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path></svg>`,
 };
-
-/* Views control */
-
-const views = document.querySelectorAll('.app-view');
-const navLinks = document.querySelectorAll('.nav-link, .menu-btn, .logo-link, .btn-redirect');
-const categoryFilterGroup = document.querySelectorAll('input[name="category-filter"]');
-
-function showView(viewId) {
-    if (viewId === 'categories-view') {
-        resetCategoriesFilter();
-    }
-
-    views.forEach(view => view.classList.add('hidden'));
-    document.getElementById(viewId).classList.remove('hidden');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    updateStickyButtonsVisibility();
-    updateNavLinksActiveState(viewId);
-    updateViewContent(viewId, true);
-    closeModalMenu();
-    closeTransactionModal();
-    closeCategoryModal();
-    closeTransactionDetailsModal();
-    closeExportMenu();
-    closeConfirmModal();
-}
-
-function updateNavLinksActiveState(viewId) {
-    navLinks.forEach(link => {
-        const isActive = link.dataset.view === viewId;
-        link.classList.toggle('is-active', isActive);
-
-        if (isActive) {
-            link.setAttribute('aria-current', 'page');
-        } else {
-            link.removeAttribute('aria-current');
-        }
-    });
-}
-
-function updateViewContent(viewId, isViewSwitch = false) {
-    if (viewId === 'dashboard-view') {
-        const data = TransactionRepository.getFilteredAndPaginated({}, { page: 1, itemsPerPage: 10 });
-        Renderer.renderTransactions(data.data, 'dashboard-transaction-list');
-
-        const titleElement = document.getElementById('history-title');
-        const infoTag = document.getElementById('history-info-tag');
-        const currentMonth = Utils.formatMonthYear(DateService.getFirstDayOfMonth());
-
-        const formattedTitle = currentMonth.charAt(0).toUpperCase() + currentMonth.slice(1);
-        titleElement.textContent = `Histórico - ${formattedTitle}`;
-        infoTag.textContent = `Exibindo as 10 últimas transações do mês de ${formattedTitle}`;
-
-        updateDashboardSummary(isViewSwitch);
-    }
-    else if (viewId === 'statements-view') {
-        document.getElementById('date-from').value = dateFilters.from;
-        document.getElementById('date-to').value = dateFilters.to;
-        const data = TransactionRepository.getFilteredAndPaginated(
-            dateFilters,
-            currentPagination
-        );
-        Renderer.renderTransactions(data.data, 'statements-transaction-list');
-        updatePaginationInfo(data);
-        updatePaginationSelect();
-        updatePaginationButtons(data);
-        updateStatementsSummary(isViewSwitch);
-    } else if (viewId === 'categories-view') {
-        Renderer.renderCategories(currentCategoryFilter);
-    }
-}
-
-function updateDashboardSummary(forceReset = false) {
-    const now = new Date();
-    const currentMonthFrom = DateService.getFirstDayOfMonth();
-    const currentMonthTo = DateService.getToday();
-    const prevMonthRange = DateService.getPreviousMonthRange();
-
-    const currentMonthList = TransactionRepository.getAllTransactionsInDateRange(currentMonthFrom, currentMonthTo);
-    const prevMonthList = TransactionRepository.getAllTransactionsInDateRange(prevMonthRange.from, prevMonthRange.to);
-
-    const currentIncome = currentMonthList.filter(transaction => transaction.amount > 0).reduce((accumulator, transaction) => accumulator + transaction.amount, 0);
-    const currentOutcome = currentMonthList.filter(transaction => transaction.amount < 0).reduce((accumulator, transaction) => accumulator + transaction.amount, 0);
-    const prevIncome = prevMonthList.filter(transaction => transaction.amount > 0).reduce((accumulator, transaction) => accumulator + transaction.amount, 0);
-    const prevOutcome = prevMonthList.filter(transaction => transaction.amount < 0).reduce((accumulator, transaction) => accumulator + transaction.amount, 0);
-    const totalBalance = currentIncome + currentOutcome;
-    const prevTotalBalance = prevIncome + prevOutcome;
-
-    const incomeValueElem = document.querySelector('.card-incomes .value');
-    const outcomeValueElem = document.querySelector('.card-outcomes .value');
-    const balanceValueElem = document.querySelector('.card-balance .value');
-    const balanceCard = document.querySelector('.card-balance');
-
-    const incomeBadge = document.querySelector('.card-incomes .percentage-tag');
-    const outcomeBadge = document.querySelector('.card-outcomes .percentage-tag');
-    const balanceBadge = document.querySelector('.card-balance .percentage-tag');
-
-    if (forceReset) {
-        if (incomeValueElem) delete incomeValueElem.dataset.currentCents;
-        if (outcomeValueElem) delete outcomeValueElem.dataset.currentCents;
-        if (balanceValueElem) delete balanceValueElem.dataset.currentCents;
-    }
-
-    if (incomeValueElem) {
-        Utils.animateCurrency(incomeValueElem, currentIncome, 800, '+');
-    }
-
-    if (outcomeValueElem) {
-        Utils.animateCurrency(outcomeValueElem, Math.abs(currentOutcome), 800, '-');
-    }
-
-    if (balanceValueElem) {
-        Utils.animateCurrency(balanceValueElem, totalBalance, 800, '');
-    }
-
-    if (balanceCard) balanceCard.classList.toggle('is-negative', totalBalance < 0);
-
-    if (incomeBadge) {
-        if (prevMonthList.length === 0) {
-            incomeBadge.innerHTML = '-';
-            incomeBadge.className = 'percentage-tag is-neutral';
-        } else if (prevIncome === 0) {
-            if (currentIncome > prevIncome) {
-                incomeBadge.innerHTML = `${utilityIconMap.arrow_up} Alta`;
-                incomeBadge.className = 'percentage-tag is-positive';
-            } else if (currentIncome < prevIncome) {
-                incomeBadge.innerHTML = `${utilityIconMap.arrow_down} Queda`;
-                incomeBadge.className = 'percentage-tag is-negative';
-            } else {
-                incomeBadge.innerHTML = `= Zero`;
-                incomeBadge.className = 'percentage-tag is-neutral';
-            }
-        } else {
-            const diff = currentIncome - prevIncome;
-            const percent = (diff / prevIncome) * 100;
-
-            if (currentIncome > prevIncome) {
-                incomeBadge.innerHTML = `${utilityIconMap.arrow_up} ${Math.abs(percent).toFixed(1)}%`;
-                incomeBadge.className = 'percentage-tag is-positive';
-            } else if (currentIncome < prevIncome) {
-                incomeBadge.innerHTML = `${utilityIconMap.arrow_down} ${Math.abs(percent).toFixed(1)}%`;
-                incomeBadge.className = 'percentage-tag is-negative';
-            } else {
-                incomeBadge.innerHTML = `=`;
-                incomeBadge.className = 'percentage-tag is-neutral';
-            }
-        }
-    }
-
-    if (outcomeBadge) {
-        if (prevMonthList.length === 0) {
-            outcomeBadge.innerHTML = '-';
-            outcomeBadge.className = 'percentage-tag is-neutral';
-        } else if (prevOutcome === 0) {
-            if (currentOutcome < prevOutcome) {
-                outcomeBadge.innerHTML = `${utilityIconMap.arrow_up} Alta`;
-                outcomeBadge.className = 'percentage-tag is-negative';
-            } else if (currentOutcome > prevOutcome) {
-                outcomeBadge.innerHTML = `${utilityIconMap.arrow_down} Queda`;
-                outcomeBadge.className = 'percentage-tag is-positive';
-            } else {
-                outcomeBadge.innerHTML = `= Zero`;
-                outcomeBadge.className = 'percentage-tag is-neutral';
-            }
-        } else {
-            const diff = currentOutcome - prevOutcome;
-            const percent = (diff / prevOutcome) * 100;
-
-            if (currentOutcome < prevOutcome) {
-                outcomeBadge.innerHTML = `${utilityIconMap.arrow_up} ${Math.abs(percent).toFixed(1)}%`;
-                outcomeBadge.className = 'percentage-tag is-negative';
-            } else if (currentOutcome > prevOutcome) {
-                outcomeBadge.innerHTML = `${utilityIconMap.arrow_down} ${Math.abs(percent).toFixed(1)}%`;
-                outcomeBadge.className = 'percentage-tag is-positive';
-            } else {
-                outcomeBadge.innerHTML = `=`;
-                outcomeBadge.className = 'percentage-tag is-neutral';
-            }
-        }
-    }
-
-    if (balanceBadge) {
-        if (prevMonthList.length === 0) {
-            balanceBadge.innerHTML = '-';
-            balanceBadge.className = 'percentage-tag is-neutral';
-        } else if (prevTotalBalance === 0) {
-            if (totalBalance > 0) {
-                balanceBadge.innerHTML = `${utilityIconMap.arrow_up} Alta`;
-                balanceBadge.className = 'percentage-tag is-positive';
-            } else if (totalBalance < 0) {
-                balanceBadge.innerHTML = `${utilityIconMap.arrow_down} Queda`;
-                balanceBadge.className = 'percentage-tag is-negative';
-            } else {
-                balanceBadge.innerHTML = `= Zero`;
-                balanceBadge.className = 'percentage-tag is-neutral';
-            }
-        } else {
-            const diff = totalBalance - prevTotalBalance;
-            const percent = (diff / prevTotalBalance) * 100;
-
-            if (totalBalance > prevTotalBalance) {
-                balanceBadge.innerHTML = `${utilityIconMap.arrow_up} ${Math.abs(percent).toFixed(1)}%`;
-                balanceBadge.className = 'percentage-tag is-positive';
-            } else if (totalBalance < prevTotalBalance) {
-                balanceBadge.innerHTML = `${utilityIconMap.arrow_down} ${Math.abs(percent).toFixed(1)}%`;
-                balanceBadge.className = 'percentage-tag is-negative';
-            } else {
-                balanceBadge.innerHTML = `=`;
-                balanceBadge.className = 'percentage-tag is-neutral';
-            }
-        }
-    }
-}
-
-function updateStatementsSummary(forceReset = false) {
-    const from = dateFilters.from;
-    const to = dateFilters.to;
-
-    const filteredTransactions = TransactionRepository.getAllTransactionsInDateRange(from, to);
-
-    const totalIncome = filteredTransactions.filter(transaction => transaction.amount > 0).reduce((accumulator, transaction) => accumulator + transaction.amount, 0);
-    const totalOutcome = filteredTransactions.filter(transaction => transaction.amount < 0).reduce((accumulator, transaction) => accumulator + transaction.amount, 0);
-    const totalBalance = totalIncome + totalOutcome;
-    const totalTransactions = filteredTransactions.length;
-
-    const incomeValueElem = document.querySelector('.income-summary-stat .stat-value');
-    const outcomeValueElem = document.querySelector('.outcome-summary-stat .stat-value');
-    const balanceValueElem = document.querySelector('.balance-summary-stat .stat-value');
-    const countValueElem = document.querySelector('.transactions-summary-stat .stat-value');
-
-    const balanceStatContainer = document.querySelector('.balance-summary-stat');
-    if (balanceStatContainer) {
-        balanceStatContainer.classList.toggle('is-negative', totalBalance < 0);
-    }
-
-    if (forceReset) {
-        if (incomeValueElem) delete incomeValueElem.dataset.currentCents;
-        if (outcomeValueElem) delete outcomeValueElem.dataset.currentCents;
-        if (balanceValueElem) delete balanceValueElem.dataset.currentCents;
-        if (countValueElem) delete countValueElem.dataset.currentValue;
-    }
-
-    if (incomeValueElem) Utils.animateCurrency(incomeValueElem, totalIncome, 800, '+');
-    if (outcomeValueElem) Utils.animateCurrency(outcomeValueElem, Math.abs(totalOutcome), 800, '-');
-    if (balanceValueElem) Utils.animateCurrency(balanceValueElem, totalBalance, 800, '');
-    if (countValueElem) Utils.animateCount(countValueElem, totalTransactions, 800);
-}
-
-function resetCategoriesFilter() {
-    currentCategoryFilter = 'all';
-    const filterAll = document.getElementById('filter-all');
-    if (filterAll) {
-        filterAll.checked = true;
-    }
-}
-
-navLinks.forEach(link => {
-    link.addEventListener('click', (event) => {
-        event.preventDefault();
-        const viewId = link.dataset.view;
-        showView(viewId);
-    });
-});
-
-categoryFilterGroup.forEach(radio => {
-    radio.addEventListener('change', (event) => {
-        currentCategoryFilter = event.target.value;
-        Renderer.renderCategories(currentCategoryFilter);
-    });
-});
-
-/* Modal Menu */
-
-const btnMenuToggle = document.querySelector('.btn-menu-toggle');
-const btnCloseMenu = document.getElementById('btn-close-menu');
-const modalMenu = document.getElementById('modal-menu');
-
-function toggleModalMenu() {
-    modalMenu.classList.toggle('hidden');
-    const isHidden = modalMenu.classList.contains('hidden');
-    btnMenuToggle.classList.toggle('is-active', !isHidden);
-    btnMenuToggle.setAttribute('aria-expanded', !isHidden);
-}
-
-function closeModalMenu() {
-    if (!modalMenu.classList.contains('hidden')) {
-        modalMenu.classList.add('hidden');
-    }
-    btnMenuToggle.classList.remove('is-active');
-    btnMenuToggle.setAttribute('aria-expanded', 'false');
-}
-
-btnMenuToggle.addEventListener('click', () => {
-    toggleModalMenu();
-});
-
-btnCloseMenu.addEventListener('click', () => {
-    closeModalMenu();
-});
-
-modalMenu.addEventListener('click', (event) => {
-    if (event.target.id === 'modal-menu') {
-        closeModalMenu();
-    }
-});
-
-/* Sticky Buttons */
-
-const btnStickyTransaction = document.getElementById('btn-add-transaction-mobile');
-const btnStickyCategory = document.getElementById('btn-add-category-mobile');
-
-function updateStickyButtonsVisibility() {
-    const activeView = document.querySelector('.app-view:not(.hidden)');
-    const activeViewId = activeView ? activeView.id : null;
-
-    if (activeViewId === 'dashboard-view' || activeViewId === 'statements-view') {
-        btnStickyTransaction.classList.remove('hidden');
-        btnStickyCategory.classList.add('hidden');
-    } else if (activeViewId === 'categories-view') {
-        btnStickyTransaction.classList.add('hidden');
-        btnStickyCategory.classList.remove('hidden');
-    } else {
-        btnStickyTransaction.classList.add('hidden');
-        btnStickyCategory.classList.add('hidden');
-    }
-}
-
-/* Transaction Form */
-
-const modalTransactionForm = document.getElementById('modal-transaction-form');
-const btnCloseTransactionForm = document.getElementById('btn-close-transaction-form');
-const openTransactionFormButtons = [
-    document.getElementById('btn-add-transaction-dashboard'),
-    document.getElementById('btn-add-transaction-statements'),
-    document.getElementById('btn-add-transaction-mobile')
-];
-const transactionForm = modalTransactionForm.querySelector('#transaction-form');
-const inputAmount = document.getElementById('transaction-form-amount');
-
-function resetInputAmountIfEmpty() {
-    if (inputAmount.value === '') {
-        inputAmount.value = 'R$ 0,00';
-    }
-}
-
-function forceCursorToEnd(input) {
-    const length = input.value.length;
-    input.setSelectionRange(length, length);
-}
-
-function openTransactionModal(transaction = null) {
-    const title = modalTransactionForm.querySelector('.transaction-form-title');
-    const description = modalTransactionForm.querySelector('.transaction-form-description');
-    const submitButton = modalTransactionForm.querySelector('button[type="submit"]');
-    const typeSelect = document.getElementById('transaction-form-type');
-
-    if (transaction) {
-        selectedTransactionId = transaction.id;
-        title.textContent = 'Editar Transação';
-        description.textContent = 'Atualize os dados abaixo para editar sua transação.';
-        submitButton.textContent = 'Salvar alterações';
-
-        const typeValue = transaction.amount > 0 ? 'income' : 'outcome';
-        Renderer.renderCategoryOptions('transaction-form-category', typeValue);
-        fillTransactionForm(transaction);
-    } else {
-        title.textContent = 'Nova Transação';
-        description.textContent = 'Preencha os dados abaixo para registrar sua transação.';
-        submitButton.textContent = 'Registrar transação';
-        transactionForm.reset();
-
-        typeSelect.value = 'outcome';
-        Renderer.renderCategoryOptions('transaction-form-category', typeSelect.value);
-    }
-
-    modalTransactionForm.classList.remove('hidden');
-    document.body.classList.add('modal-open');
-
-    setTimeout(() => {
-        document.getElementById('btn-close-transaction-form').focus();
-    }, 100);
-}
-
-function fillTransactionForm(transaction) {
-    const form = document.getElementById('transaction-form');
-
-    form.querySelector('[name="description"]').value = transaction.description;
-    form.querySelector('[name="date"]').value = transaction.date;
-    form.querySelector('[name="categoryId"]').value = transaction.categoryId;
-
-    const typeValue = transaction.amount > 0 ? 'income' : 'outcome';
-    form.querySelector('[name="type"]').value = typeValue;
-
-    const rawAmount = Math.abs(transaction.amount);
-    const amountInput = document.getElementById('transaction-form-amount');
-    amountInput.value = Utils.formatCurrency(rawAmount);
-}
-
-function closeTransactionModal() {
-    modalTransactionForm.classList.add('hidden');
-    document.body.classList.remove('modal-open');
-    selectedTransactionId = null;
-}
-
-openTransactionFormButtons.forEach(button => {
-    button.addEventListener('click', () => {
-        openTransactionModal();
-    });
-});
-
-btnCloseTransactionForm.addEventListener('click', () => {
-    closeTransactionModal();
-});
-
-modalTransactionForm.addEventListener('click', (event) => {
-    if (event.target.id === 'modal-transaction-form') {
-        closeTransactionModal();
-    }
-});
-
-transactionForm.addEventListener('submit', (event) => {
-    event.preventDefault();
-
-    try {
-        const formData = new FormData(transactionForm);
-        const rawData = Object.fromEntries(formData.entries());
-        const cleanData = SanitizationService.cleanTransaction(rawData);
-        const validationResult = ValidationService.validateTransaction(cleanData);
-        const activeView = document.querySelector('.app-view:not(.hidden)');
-        const activeViewId = activeView ? activeView.id : null;
-
-        if (!validationResult.isValid) {
-            throw new Error(validationResult.errors.join("\n"));
-        }
-
-        if (selectedTransactionId) {
-            TransactionRepository.updateTransaction(selectedTransactionId, cleanData);
-        } else {
-            TransactionRepository.addTransaction(cleanData);
-        }
-
-        updateViewContent(activeViewId);
-        transactionForm.reset();
-        closeTransactionModal();
-    } catch (error) {
-        ExceptionService.handle(error);
-    }
-});
-
-inputAmount.addEventListener('input', (event) => {
-    let value = event.target.value;
-
-    value = value.replace(/\D/g, '');
-
-    if (value === '') {
-        event.target.value = 'R$ 0,00';
-        return;
-    }
-
-    const cents = parseInt(value, 10);
-
-    event.target.value = Utils.formatCurrency(cents);
-    forceCursorToEnd(event.target);
-});
-
-inputAmount.addEventListener('keydown', (event) => {
-    const forbiddenKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'];
-
-    if (forbiddenKeys.includes(event.key)) {
-        event.preventDefault();
-    }
-});
-
-inputAmount.addEventListener('click', (event) => {
-    resetInputAmountIfEmpty();
-    forceCursorToEnd(event.target)
-});
-
-inputAmount.addEventListener('focus', (event) => {
-    resetInputAmountIfEmpty();
-    forceCursorToEnd(event.target)
-});
-
-document.getElementById('transaction-form-type').addEventListener('change', (event) => {
-    const selectedType = event.target.value;
-    Renderer.renderCategoryOptions('transaction-form-category', selectedType);
-});
-
-document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && !modalTransactionForm.classList.contains('hidden')) {
-        closeTransactionModal();
-    }
-});
-
-/* Category Form */
-
-const modalCategoryForm = document.getElementById('modal-category-form');
-const btnCloseCategoryForm = document.getElementById('btn-close-category-form');
-const categoryForm = document.getElementById('category-form');
-const openCategoryFormButtons = [
-    document.getElementById('btn-add-category-desktop'),
-    document.getElementById('btn-add-category-mobile')
-];
-
-function openCategoryModal(category = null) {
-    const title = modalCategoryForm.querySelector('.category-form-title');
-    const description = modalCategoryForm.querySelector('.category-form-description');
-    const submitButton = modalCategoryForm.querySelector('button[type="submit"]');
-
-    if (category) {
-        selectedCategoryId = category.id;
-        title.textContent = 'Editar Categoria';
-        description.textContent = 'Atualize os dados abaixo para editar sua categoria.';
-        submitButton.textContent = 'Salvar alterações';
-
-        Renderer.renderIconOptions('category-icon');
-        fillCategoryForm(category);
-    } else {
-        title.textContent = 'Nova Categoria';
-        description.textContent = 'Preencha os dados abaixo para registrar sua categoria.';
-        submitButton.textContent = 'Registrar Categoria';
-        categoryForm.reset();
-
-        Renderer.renderIconOptions('category-icon');
-    }
-
-    modalCategoryForm.classList.remove('hidden');
-    document.body.classList.add('modal-open');
-
-    setTimeout(() => {
-        document.getElementById('btn-close-category-form').focus();
-    }, 100);
-}
-
-function fillCategoryForm(category) {
-    categoryForm.querySelector('[name="name"]').value = category.name;
-    categoryForm.querySelector('[name="type"]').value = category.type;
-    categoryForm.querySelector('[name="iconId"]').value = category.iconId;
-}
-
-function closeCategoryModal() {
-    modalCategoryForm.classList.add('hidden');
-    document.body.classList.remove('modal-open');
-    selectedCategoryId = null;
-}
-
-openCategoryFormButtons.forEach(button => {
-    button.addEventListener('click', () => {
-        openCategoryModal();
-    });
-});
-
-btnCloseCategoryForm.addEventListener('click', () => {
-    closeCategoryModal();
-});
-
-modalCategoryForm.addEventListener('click', (event) => {
-    if (event.target.id === 'modal-category-form') {
-        closeCategoryModal();
-    }
-});
-
-categoryForm.addEventListener('submit', (event) => {
-    event.preventDefault();
-
-    try {
-        const form = event.target;
-        const formData = new FormData(form);
-        const rawData = Object.fromEntries(formData.entries());
-        const cleanData = SanitizationService.cleanCategory(rawData);
-        const validationResult = ValidationService.validateCategory(cleanData);
-        const activeView = document.querySelector('.app-view:not(.hidden)');
-        const activeViewId = activeView ? activeView.id : null;
-
-        if (!validationResult.isValid) {
-            throw new Error(validationResult.errors.join("\n"));
-        }
-
-        if (selectedCategoryId) {
-            CategoryRepository.updateCategory(selectedCategoryId, cleanData);
-        } else {
-            CategoryRepository.addCategory(cleanData);
-        }
-
-        updateViewContent(activeViewId);
-        form.reset();
-        closeCategoryModal();
-    } catch (error) {
-        ExceptionService.handle(error);
-    }
-});
-
-document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && !modalCategoryForm.classList.contains('hidden')) {
-        closeCategoryModal();
-    }
-});
-
-/* Transaction Details */
-
-const modalTransactionDetails = document.getElementById('modal-transaction-details');
-const btnCloseTransactionDetails = document.getElementById('btn-close-transaction-details');
-const btnDeleteTransaction = document.getElementById('btn-delete-transaction');
-const btnEditTransaction = document.getElementById('btn-edit-transaction');
-
-function openTransactionDetailsModal(transactionId) {
-    selectedTransactionId = transactionId;
-
-    const transaction = TransactionRepository.getTransactionById(transactionId);
-    if (!transaction) {
-        throw new Error("Transação não encontrada.");
-    }
-
-    const categoryData = CategoryRepository.getCategoryById(transaction.categoryId);
-    const categoryIcon = IconHelper.getIconById(categoryData.iconId);
-
-    const iconContainer = modalTransactionDetails.querySelector('.category-icon-bg');
-    const categoryNameElem = modalTransactionDetails.querySelector('.transaction-category span');
-    const descriptionElem = modalTransactionDetails.querySelector('.transaction-details-description');
-    const amountElem = modalTransactionDetails.querySelector('.transaction-details-amount');
-    const dateElem = modalTransactionDetails.querySelector('.transaction-details-date');
-
-    const isNegative = transaction.amount < 0;
-
-    const [year, month, day] = transaction.date.split('-');
-    const dateFormatted = `${day}/${month}/${year}`;
-
-    if (iconContainer) iconContainer.innerHTML = categoryIcon;
-    if (categoryNameElem) categoryNameElem.textContent = categoryData.name;
-    if (descriptionElem) descriptionElem.textContent = transaction.description;
-
-    if (amountElem) {
-        amountElem.textContent = `${isNegative ? '' : '+'}${Utils.formatCurrency(transaction.amount)}`;
-        amountElem.classList.toggle('is-negative', isNegative);
-        amountElem.classList.toggle('is-positive', !isNegative);
-    }
-
-    if (dateElem) {
-        dateElem.textContent = dateFormatted;
-        dateElem.setAttribute('datetime', transaction.date);
-    }
-
-    modalTransactionDetails.classList.remove('hidden');
-    document.body.classList.add('modal-open');
-
-    setTimeout(() => {
-        document.getElementById('btn-close-transaction-details').focus();
-    }, 100);
-}
-
-function closeTransactionDetailsModal() {
-    modalTransactionDetails.classList.add('hidden');
-    document.body.classList.remove('modal-open');
-    selectedTransactionId = null;
-}
-
-document.body.addEventListener('click', (event) => {
-    const item = event.target.closest('.transaction-item');
-    if (item) {
-        try {
-            const transactionId = item.dataset.id;
-            openTransactionDetailsModal(transactionId);
-        } catch (error) {
-            ExceptionService.handle(error);
-        }
-    }
-});
-
-document.body.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-        const item = event.target.closest('.transaction-item');
-        if (item) {
-            event.preventDefault();
-            try {
-                const transactionId = item.dataset.id;
-                openTransactionDetailsModal(transactionId);
-            } catch (error) {
-                ExceptionService.handle(error);
-            }
-        }
-    }
-});
-
-btnCloseTransactionDetails.addEventListener('click', () => {
-    closeTransactionDetailsModal();
-});
-
-modalTransactionDetails.addEventListener('click', (event) => {
-    if (event.target.id === 'modal-transaction-details') {
-        closeTransactionDetailsModal();
-    }
-});
-
-btnEditTransaction.addEventListener('click', () => {
-    if (selectedTransactionId) {
-        const transaction = TransactionRepository.getTransactionById(selectedTransactionId);
-        if (transaction) {
-            closeTransactionDetailsModal();
-            openTransactionModal(transaction);
-        }
-    }
-});
-
-btnDeleteTransaction.addEventListener('click', () => {
-    if (selectedTransactionId) {
-        openConfirmModal(selectedTransactionId,
-            "Excluir transação",
-            "Você tem certeza que deseja remover esta transação?<br><br><strong>Essa ação não poderá ser desfeita</strong> e o valor será removido do seu saldo atual.",
-            (idToDelete) => {
-                TransactionRepository.deleteTransaction(idToDelete);
-                const activeView = document.querySelector('.app-view:not(.hidden)');
-                if (activeView) {
-                    updateViewContent(activeView.id);
-                }
-            }
-        );
-    }
-});
-
-document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && !modalTransactionDetails.classList.contains('hidden')) {
-        closeTransactionDetailsModal();
-    }
-});
-
-/* Confirmation of Deletion */
-
-const modalDelete = document.getElementById('modal-confirm');
-const btnCancelDelete = document.getElementById('btn-confirm-cancel');
-const btnConfirmDelete = document.getElementById('btn-confirm-delete');
-
-function openConfirmModal(idToDelete, title, description, confirmCallback) {
-    document.getElementById('confirm-title').textContent = title;
-    document.getElementById('confirm-description').innerHTML = description;
-
-    abortController.abort();
-    abortController = new AbortController();
-
-    btnConfirmDelete.addEventListener('click', () => {
-        confirmCallback(idToDelete);
-        closeConfirmModal();
-        if (!modalTransactionDetails.classList.contains('hidden')) {
-            closeTransactionDetailsModal();
-        }
-    }, { signal: abortController.signal, once: true });
-
-    modalDelete.classList.remove('hidden');
-    document.body.classList.add('modal-open');
-
-    setTimeout(() => {
-        document.getElementById('btn-confirm-cancel').focus();
-    }, 100);
-}
-
-function closeConfirmModal() {
-    abortController.abort();
-    abortController = new AbortController();
-
-    modalDelete.classList.add('hidden');
-    if (modalTransactionDetails.classList.contains('hidden')) {
-        document.body.classList.remove('modal-open');
-    }
-}
-
-btnCancelDelete.addEventListener('click', () => {
-    closeConfirmModal();
-});
-
-modalDelete.addEventListener('click', (event) => {
-    if (event.target.id === 'modal-confirm') {
-        closeConfirmModal();
-    }
-});
-
-document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && !modalDelete.classList.contains('hidden')) {
-        closeConfirmModal();
-    }
-});
-
-/* Category Cards */
-
-document.body.addEventListener('click', (event) => {
-    const editBtn = event.target.closest('.btn-action-edit');
-
-    if (editBtn && document.getElementById('categories-view').classList.contains('hidden') === false) {
-        const categoryCard = editBtn.closest('.category-card');
-        const categoryId = categoryCard.dataset.id;
-        const category = CategoryRepository.getCategoryById(categoryId);
-
-        openCategoryModal(category);
-    }
-});
-
-document.body.addEventListener('click', (event) => {
-    const deleteBtn = event.target.closest('.btn-action-delete');
-
-    if (deleteBtn && document.getElementById('categories-view').classList.contains('hidden') === false) {
-        try {
-            const categoryCard = deleteBtn.closest('.category-card');
-            const categoryId = categoryCard.dataset.id;
-            const categoryName = CategoryRepository.getCategoryById(categoryId).name;
-
-            if (!categoryName) {
-                throw new Error("Categoria não encontrada.");
-            }
-
-            openConfirmModal(
-                categoryId,
-                'Excluir categoria',
-                `Tem certeza que deseja excluir a categoria <strong>${categoryName}</strong>?<br><br>Categorias já utilizadas não podem ser excluídas.`,
-                (idToDelete) => {
-                    try {
-                        CategoryRepository.deleteCategory(idToDelete);
-                        const activeView = document.querySelector('.app-view:not(.hidden)');
-                        if (activeView) {
-                            updateViewContent(activeView.id);
-                        }
-                    } catch (error) {
-                        ExceptionService.handle(error);
-                    }
-                }
-            );
-        } catch (error) {
-            ExceptionService.handle(error);
-        }
-    }
-});
-
-/* Statements Export */
-
-const btnExportAction = document.getElementById('btn-export-action');
-const btnExportToggle = document.getElementById('btn-export-toggle');
-const exportMenuOptions = document.getElementById('export-menu-options');
-
-function toggleExportMenu() {
-    exportMenuOptions.classList.toggle('hidden');
-    const isHidden = exportMenuOptions.classList.contains('hidden');
-    btnExportToggle.setAttribute('aria-expanded', !isHidden);
-}
-
-function closeExportMenu() {
-    exportMenuOptions.classList.add('hidden');
-    btnExportToggle.setAttribute('aria-expanded', 'false');
-}
-
-function exportData(format) {
-    try {
-        if (format === 'csv') {
-            ExportService.exportToCSV();
-        } else if (format === 'pdf') {
-            ExportService.exportToPDF();
-        } else {
-            throw new Error("Formato de exportação inválido.");
-        }
-    } catch (error) {
-        ExceptionService.handle(error);
-    }
-}
-
-btnExportToggle.addEventListener('click', () => {
-    toggleExportMenu();
-});
-
-exportMenuOptions.addEventListener('click', (event) => {
-    const option = event.target.closest('.export-option');
-    const currentFormat = btnExportToggle.querySelector('.current-format');
-    btnExportToggle.dataset.format = option.dataset.format;
-    currentFormat.textContent = option.textContent;
-    toggleExportMenu();
-});
-
-btnExportAction.addEventListener('click', () => {
-    const format = btnExportToggle.dataset.format;
-    exportData(format);
-});
-
-document.addEventListener('click', (event) => {
-    const isClickInsideExport = btnExportToggle.contains(event.target) ||
-        exportMenuOptions.contains(event.target);
-
-    if (!isClickInsideExport && !exportMenuOptions.classList.contains('hidden')) {
-        closeExportMenu();
-    }
-});
-
-document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && !exportMenuOptions.classList.contains('hidden')) {
-        closeExportMenu();
-    }
-});
-
-/* Back-to-top Button */
-
-const btnBackToTop = document.querySelector('.btn-back-to-top');
-
-window.addEventListener('scroll', () => {
-    if (window.scrollY > 300) {
-        btnBackToTop.classList.add('is-visible');
-    } else {
-        btnBackToTop.classList.remove('is-visible');
-    }
-});
-
-btnBackToTop.addEventListener('click', (event) => {
-    event.preventDefault();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-});
-
-/* Pagination */
-
-const itemsPerPageSelect = document.getElementById('items-per-page');
-const btnPrevPage = document.querySelector('.page-btn[aria-label="Página anterior"]');
-const btnNextPage = document.querySelector('.page-btn[aria-label="Próxima página"]');
-const pageNumbersContainer = document.querySelector('.page-numbers-container');
-
-const inputDateFrom = document.getElementById('date-from');
-const inputDateTo = document.getElementById('date-to');
-
-function updatePaginationInfo(paginationData) {
-    const infoText = document.querySelector('.current-shown-items');
-    if (!infoText) return;
-
-    const start = (currentPagination.page - 1) * currentPagination.itemsPerPage + 1;
-    const end = Math.min(currentPagination.page * currentPagination.itemsPerPage, paginationData.totalItems);
-
-    infoText.textContent = `${paginationData.totalItems === 0 ? 0 : start}-${end} de ${paginationData.totalItems} itens`;
-}
-
-function updatePaginationSelect() {
-    const options = itemsPerPageSelect.querySelectorAll('option');
-    options.forEach(option => option.removeAttribute('selected'));
-
-    itemsPerPageSelect.value = currentPagination.itemsPerPage.toString();
-    const selectedOption = itemsPerPageSelect.querySelector(`option[value="${currentPagination.itemsPerPage}"]`);
-    if (selectedOption) {
-        selectedOption.setAttribute('selected', 'selected');
-    }
-}
-
-function updatePaginationButtons(paginationData) {
-    const totalPages = paginationData.totalPages || 1;
-
-    btnPrevPage.disabled = currentPagination.page === 1;
-    btnNextPage.disabled = currentPagination.page === totalPages || paginationData.totalItems === 0;
-
-    pageNumbersContainer.innerHTML = '';
-
-    let startPage = Math.max(1, currentPagination.page - 1);
-    let endPage = Math.min(totalPages, startPage + 2);
-
-    if (endPage - startPage < 2) {
-        startPage = Math.max(1, endPage - 2);
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-        const btnPage = document.createElement('button');
-        btnPage.className = 'page-btn';
-        btnPage.textContent = i;
-        btnPage.setAttribute('aria-label', `Página ${i}`);
-
-        if (i === currentPagination.page) {
-            btnPage.classList.add('is-active');
-            btnPage.setAttribute('aria-current', 'page');
-        }
-
-        btnPage.addEventListener('click', () => {
-            currentPagination.page = i;
-            updateViewContent('statements-view');
-        });
-
-        pageNumbersContainer.appendChild(btnPage);
-    }
-
-    if (paginationData.totalItems === 0) {
-        pageNumbersContainer.innerHTML = '<button class="page-btn is-active" disabled>1</button>';
-    }
-}
-
-itemsPerPageSelect.addEventListener('change', (event) => {
-    let itemsPerPageNumber = parseInt(event.target.value);
-    if (isNaN(itemsPerPageNumber) || itemsPerPageNumber <= 0) {
-        itemsPerPageNumber = 10;
-    }
-    currentPagination.itemsPerPage = itemsPerPageNumber;
-    SettingsService.setItemsPerPage(itemsPerPageNumber);
-    currentPagination.page = 1;
-
-    updateViewContent('statements-view');
-});
-
-btnPrevPage.addEventListener('click', () => {
-    if (currentPagination.page > 1) {
-        currentPagination.page--;
-        updateViewContent('statements-view');
-    }
-});
-
-btnNextPage.addEventListener('click', () => {
-    const totalPages = TransactionRepository.getTotalPagesFiltered(
-        dateFilters.from, 
-        dateFilters.to, 
-        currentPagination.itemsPerPage
-    );
-
-    if (currentPagination.page < totalPages) {
-        currentPagination.page++;
-        updateViewContent('statements-view');
-    }
-});
-
-inputDateFrom.addEventListener('change', (event) => {
-    const dateTo = inputDateTo.value;
-    dateFilters.from = event.target.value;
-
-    if (dateFilters.from > dateTo) {
-        dateFilters.from = dateTo;
-        inputDateFrom.value = dateTo;
-    }
-
-    currentPagination.page = 1;
-    updateViewContent('statements-view');
-});
-
-inputDateTo.addEventListener('change', (event) => {
-    const dateFrom = inputDateFrom.value;
-    dateFilters.to = event.target.value;
-
-    if (dateFilters.to < dateFrom) {
-        dateFilters.to = dateFrom;
-        inputDateTo.value = dateFrom;
-    }
-
-    currentPagination.page = 1;
-    updateViewContent('statements-view');
-});
