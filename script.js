@@ -832,7 +832,6 @@ const ViewController = {
     },
 
     updateNavigationLinksActiveState(viewId) {
-        console.log('sdfsd');
         this.elements.navigationLinks.forEach(link => {
             const isActive = link.dataset.view === viewId;
             link.classList.toggle('is-active', isActive);
